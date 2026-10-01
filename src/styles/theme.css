@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --azul: #120180;
+  --azul-2: #1e3a8a;
+  --celeste: #38bdf8;
+  --verde-claro: #5ae280;
+  --verde: #00cd93;
+  --verde-osc: #047857;
+  --gris: #333333;
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --ink: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --shadow: 0 10px 28px -12px rgba(18, 1, 128, 0.18);
+}
+
+[data-theme='dark'] {
+  --bg: #0c0a26;
+  --card: #171344;
+  --ink: #eef0ff;
+  --muted: #a5a8d3;
+  --line: #2c2670;
+  --shadow: 0 10px 28px -12px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: 'Raleway', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 18px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar img.logo {
+  height: 34px;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.topbar nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+.topbar nav a.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--azul) 0%, var(--azul-2) 100%);
+}
+
+.topbar .spacer {
+  flex: 1;
+}
+
+.theme-btn {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.view {
+  flex: 1;
+  min-height: 0;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filters select {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+}
+
+.kpis {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 10px;
+}
+
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.5s ease both;
+  min-width: 0;
+}
+
+.kpi .label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kpi .value {
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.kpi .sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--verde-osc);
+}
+
+[data-theme='dark'] .kpi .sub {
+  color: var(--verde-claro);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card h3 {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.grid-2 {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+
+.scroll-inner {
+  overflow: auto;
+  min-height: 0;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+table.data th {
+  position: sticky;
+  top: 0;
+  background: var(--azul);
+  color: #fff;
+  padding: 7px 8px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table.data td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+table.data td:first-child {
+  text-align: left;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background: linear-gradient(135deg, var(--verde) 0%, var(--verde-osc) 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bar-group {
+  animation: fadeUp 0.6s ease both;
+}
+
+.heat {
+  display: grid;
+  gap: 3px;
+}
+
+.heat .cell {
+  border-radius: 5px;
+  min-height: 18px;
+}

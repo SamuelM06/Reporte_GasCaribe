@@ -1,16 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
 ---
-<Layout title="Gestion Caribe">
-  <h1>Gestion Caribe</h1>
-  <p>API lista. Front visual en Plan 03.</p>
-  <ul>
-    <li><a href="/api/health">/api/health</a></li>
-    <li>/api/GasCaribe/clasificacion/resumen</li>
-    <li>/api/GasCaribe/clasificacion/resultados</li>
-    <li>/api/GasCaribe/abandono/franjas</li>
-    <li>/api/GasCaribe/inbound/mensual</li>
-    <li>/api/GasCaribe/outbound/mensual</li>
-    <li>/api/GasCaribe/calidad/sin-mapear</li>
-  </ul>
+<Layout title="Reporte GasCaribe" active="inicio">
+  <div class="card" style={{ flex: 1 } as never}>
+    <h3>Reporte de gestión — Gases del Caribe</h3>
+    <p>
+      Gestión diaria de retenciones enero a septiembre 2026: inbound, outbound y abandono,
+      clasificados como llamada <strong>APTA</strong> o <strong>NO APTA</strong> según el
+      resultado de retención.
+    </p>
+    <p>
+      Usa <strong>Gestión diaria</strong> para KPIs, tendencia, tablas por resultado,
+      aseguradora, producto y cabina. Usa <strong>Abandono</strong> para únicos,
+      duplicados, gestionados por inbound y mapa de calor por hora.
+    </p>
+    <p>Filtros globales: mes, cabina, clasificación y producto. Todo en una sola vista, sin scroll.</p>
+  </div>
 </Layout>

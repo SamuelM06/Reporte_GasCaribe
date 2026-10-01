@@ -17,6 +17,7 @@
 | 2026-10-01 | Plan02 ejecutado | Scaffold Astro 5 + React + Node adapter en raiz; pool pg solo-servidor con SSL; `normalizarTexto`/`clasificarConCatalogo`/`horaAFranja` + 17 tests verdes; vista `v_caribe_abandono_franja` (pico 10-11 AM); 7 endpoints GasCaribe 200 + 404 gasera desconocida; `npm run build` OK; `nueva-gasera.ts` listo | README actualizado. Front queda Plan 03. |
 | 2026-10-01 | SIN REGISTRO | `estado` NULL → `'SIN REGISTRO'` (1818 inbound + 80 outbound); catalogo +1 fila (40); rematerializado; cero NULL en `estado`/`resultado_normalizado`/`clasificacion`; `sin_mapear`=0 | `scripts/etl/14_sin_registro.py`. |
 | 2026-10-01 | Push GitHub | Repo init + push a `SamuelM06/Reporte_GasCaribe` (master `7c8d6b7`); verificado `.env`/xlsx/backups/node_modules fuera del push; scripts ETL portables (rutas relativas) | Listo para Plan 03 front. |
+| 2026-10-01 | Plan03 ejecutado | README simple; `context/manual-marca/` (Xuma #120180/#5AE280/#00CD93, Raleway); cabina=operador (cabina vacia en Excel); `normalizar_producto/aseguradora` SQL+TS + `gestionado_inbound` (3556); tema claro/oscuro, layout 100dvh sin scroll, filtros Mes/Cabina/Clasif/Producto; 13 endpoints nuevos 200 + 3 vistas; 36 tests verdes; `no-store` en API; rama `main` | Bugs corregidos: SSL pg, placeholders $n, DISTINCT/ORDER BY. Docker daemon apagado: imagen sin validar. |
 
 ---
 <!-- Agregar cada gestion debajo con fecha -->
