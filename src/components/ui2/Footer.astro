@@ -15,7 +15,7 @@ const anio = new Date().getFullYear();
     <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-tinta/55">
       <span>&copy; {anio} Xuma &middot; Promigas</span>
       <span aria-hidden="true" class="hidden sm:inline">&middot;</span>
-      <span title="Compilación visible para confirmar versión desplegada">build {new Date().toISOString().slice(0, 10)}</span>
+      <span title="Identificador de compilación: confirma qué versión está desplegada">build {__BUILD_ID__}</span>
       <span aria-hidden="true" class="hidden sm:inline">&middot;</span>
       <span>Uso interno &middot; datos de terceros</span>
     </div>
