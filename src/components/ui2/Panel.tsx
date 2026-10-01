@@ -18,7 +18,7 @@ export function Panel({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`glass flex min-h-0 flex-col overflow-hidden rounded-3xl p-3 ${className}`}
+      className={`glass flex h-full min-h-0 flex-col overflow-hidden rounded-3xl p-3 ${className}`}
     >
       <div className="mb-1.5 flex items-baseline justify-between gap-2">
         <h3 className="truncate text-sm font-extrabold tracking-tight">{titulo}</h3>
@@ -29,7 +29,22 @@ export function Panel({
   );
 }
 
-export function TablaGlass({ columns, rows }: { columns: string[]; rows: Array<Record<string, unknown>> }) {
+export function TablaGlass({
+  columns,
+  rows,
+  headers,
+  format,
+}: {
+  columns: string[];
+  rows: Array<Record<string, unknown>>;
+  headers?: Record<string, string>;
+  format?: (col: string, value: unknown) => string;
+}) {
+  const cell = (c: string, v: unknown): string => {
+    if (format) return format(c, v);
+    if (v == null) return '—';
+    return String(v);
+  };
   return (
     <div className="h-full overflow-auto rounded-xl">
       <table className="w-full border-collapse text-xs">
@@ -37,7 +52,7 @@ export function TablaGlass({ columns, rows }: { columns: string[]; rows: Array<R
           <tr>
             {columns.map((c) => (
               <th key={c} className="whitespace-nowrap bg-xuma-azul px-2.5 py-2 text-center text-[11px] font-bold text-white first:text-left dark:bg-xuma-azul-2">
-                {c}
+                {headers?.[c] ?? c}
               </th>
             ))}
           </tr>
@@ -47,7 +62,7 @@ export function TablaGlass({ columns, rows }: { columns: string[]; rows: Array<R
             <tr key={i} className="border-b border-tinta/10 transition-colors last:border-0 hover:bg-tinta/5">
               {columns.map((c) => (
                 <td key={c} className="whitespace-nowrap px-2.5 py-1.5 text-center font-bold first:text-left">
-                  {r[c] == null ? '—' : String(r[c])}
+                  {cell(c, r[c])}
                 </td>
               ))}
             </tr>

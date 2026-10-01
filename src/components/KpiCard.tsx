@@ -18,6 +18,10 @@ interface Props {
   // compacto: cifra grande en formato corto (miles de millones / compacto).
   centrado?: boolean;
   compacto?: boolean;
+  // sufijo: texto fijo tras la cifra (ej. '%'). No interfiere con el count-up.
+  sufijo?: string;
+  // decimales: cifras con decimales fijos (ej. % con 1 decimal). Default 0 (entero).
+  decimales?: number;
 }
 
 // La barra superior y el halo cambian con el tema: en claro usan tonos profundos
@@ -40,14 +44,15 @@ const icCls = {
 } as const;
 
 // Tarjeta KPI con contador animado (count-up) al entrar en pantalla.
-export default function KpiCard({ titulo, valor, icono, moneda = false, acento, sub, delay = 0, grande = false, hero = false, className = '', centrado = false, compacto = false }: Props) {
+export default function KpiCard({ titulo, valor, icono, moneda = false, acento, sub, delay = 0, grande = false, hero = false, className = '', centrado = false, compacto = false, sufijo = '', decimales = 0 }: Props) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: '-40px' });
   const cfg = ACENTOS[acento];
 
   const textoValor = (v: number): string => {
-    if (moneda) return compacto ? formatCOPMilesM(v) : formatCOP(v);
-    return compacto ? formatNumCompact(Math.round(v)) : formatNum(Math.round(v));
+    if (decimales > 0) return `${v.toFixed(decimales)}${sufijo}`;
+    const base = moneda ? (compacto ? formatCOPMilesM(v) : formatCOP(v)) : compacto ? formatNumCompact(Math.round(v)) : formatNum(Math.round(v));
+    return `${base}${sufijo}`;
   };
 
   useEffect(() => {

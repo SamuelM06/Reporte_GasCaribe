@@ -20,6 +20,8 @@
 | 2026-10-01 | Plan03 ejecutado | README simple; `context/manual-marca/` (Xuma #120180/#5AE280/#00CD93, Raleway); cabina=operador (cabina vacia en Excel); `normalizar_producto/aseguradora` SQL+TS + `gestionado_inbound` (3556); tema claro/oscuro, layout 100dvh sin scroll, filtros Mes/Cabina/Clasif/Producto; 13 endpoints nuevos 200 + 3 vistas; 36 tests verdes; `no-store` en API; rama `main` | Bugs corregidos: SSL pg, placeholders $n, DISTINCT/ORDER BY. Docker daemon apagado: imagen sin validar. |
 | 2026-10-01 | Rediseno visual Siniestros | Portado sistema visual: Tailwind 4 + recharts + lucide + motion, Raleway local, glass, fondo animado, KpiCard count-up, SelectXuma, DashboardLayout (Inicio/Gestion/Abandono), graficos recharts + heatmap; 28 verificaciones 200 | Pendiente tu revision visual en red interna. |
 | 2026-10-01 | Fix inicio + islas | Inicio estilo dashboard con datos vivos SSR (titulo, logo, totales); ErrorBoundary visible; alturas viewport fijas para graficos recharts | Si una vista falla, muestra el error en pantalla. |
+| 2026-10-01 | UX senior (2 tabs) | Inicio estilo Siniestros (hero+pilares, sin tarjetas); filtros uniformes; KPI % con signo+decimal; tablas con headers y % formateados; detalle transpuesto meses×resultados; gestion en 2 tabs multi-grafico; CDP real: 18 recharts+8 KPIs gestion, 5+7 abandono, 0 errores | Cabina=operador documentado. |
 
 ---
+<!-- Agregar cada gestion debajo con fecha -->
 <!-- Agregar cada gestion debajo con fecha -->

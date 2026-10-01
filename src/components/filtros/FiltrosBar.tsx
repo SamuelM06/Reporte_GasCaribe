@@ -49,11 +49,12 @@ export default function FiltrosBar({
   const set = (k: keyof FiltroValor) => (vv: string) => onChange({ ...valor, [k]: vv });
   const activos = [valor.mes, valor.cabina, valor.clasificacion, valor.producto].filter(Boolean).length;
   return (
-    <div className="glass flex flex-wrap items-center gap-2 rounded-2xl p-2">
+    <div className="glass flex flex-wrap items-stretch gap-2 rounded-2xl p-2">
       <span className="flex items-center gap-1.5 px-2 text-xs font-bold text-tinta/60">
         <Filter className="h-4 w-4" /> Filtros
         {activos > 0 && <span className="rounded-full bg-xuma-verde-oscuro px-2 py-0.5 text-[10px] text-white">{activos}</span>}
       </span>
+      <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.mes}
         opciones={MESES.map((m, i) => ({ valor: String(i + 1), etiqueta: m }))}
@@ -61,7 +62,10 @@ export default function FiltrosBar({
         placeholder="Mes"
         icono={<CalendarDays className="h-4 w-4" />}
         compact
+        desplegableClase="w-full"
       />
+      </div>
+      <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.cabina}
         opciones={(opciones?.cabinas ?? []).map((c) => ({ valor: c.cabina, etiqueta: c.cabina }))}
@@ -69,7 +73,10 @@ export default function FiltrosBar({
         placeholder="Cabina"
         icono={<Building2 className="h-4 w-4" />}
         compact
+        desplegableClase="w-full"
       />
+      </div>
+      <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.clasificacion}
         opciones={[
@@ -80,8 +87,11 @@ export default function FiltrosBar({
         placeholder="Clasificación"
         icono={<Tags className="h-4 w-4" />}
         compact
+        desplegableClase="w-full"
       />
+      </div>
       {conProducto && (
+        <div className="min-w-[140px] flex-1">
         <SelectXuma
           valor={valor.producto}
           opciones={(opciones?.productos ?? []).map((p) => ({ valor: p.producto, etiqueta: p.producto }))}
@@ -89,7 +99,9 @@ export default function FiltrosBar({
           placeholder="Producto"
           icono={<Package className="h-4 w-4" />}
           compact
+          desplegableClase="w-full"
         />
+        </div>
       )}
       <button
         onClick={onReset}
