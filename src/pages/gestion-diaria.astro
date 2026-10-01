@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { GestionDiaria } from '../components/GestionDiaria.jsx';
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+import GestionApp from '../components/gestion/GestionApp.jsx';
 ---
-<Layout title="Gestión diaria — GasCaribe" active="gestion">
-  <GestionDiaria gasera="GasCaribe" client:load />
-</Layout>
+<DashboardLayout title="Gestión diaria — GasCaribe">
+  <GestionApp gasera="GasCaribe" client:load />
+</DashboardLayout>

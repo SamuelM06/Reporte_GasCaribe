@@ -1,19 +1,26 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import DashboardLayout from '../layouts/DashboardLayout.astro';
 ---
-<Layout title="Reporte GasCaribe" active="inicio">
-  <div class="card" style={{ flex: 1 } as never}>
-    <h3>Reporte de gestión — Gases del Caribe</h3>
-    <p>
-      Gestión diaria de retenciones enero a septiembre 2026: inbound, outbound y abandono,
-      clasificados como llamada <strong>APTA</strong> o <strong>NO APTA</strong> según el
-      resultado de retención.
+<DashboardLayout title="Reporte GasCaribe | Gases del Caribe">
+  <div class="glass flex h-full flex-col justify-center gap-3 rounded-3xl p-6">
+    <p class="text-xs font-extrabold uppercase tracking-widest text-xuma-verde-oscuro dark:text-xuma-verde-claro">
+      Gases del Caribe · Enero – Septiembre 2026
     </p>
-    <p>
-      Usa <strong>Gestión diaria</strong> para KPIs, tendencia, tablas por resultado,
-      aseguradora, producto y cabina. Usa <strong>Abandono</strong> para únicos,
-      duplicados, gestionados por inbound y mapa de calor por hora.
+    <h1 class="bg-gradient-to-r from-xuma-azul via-xuma-azul-3 to-xuma-verde-oscuro bg-clip-text text-3xl font-black tracking-tight text-transparent md:text-5xl dark:from-white dark:via-xuma-verde-claro dark:to-xuma-verde-oscuro">
+      Reporte de gestión diaria de retenciones
+    </h1>
+    <p class="max-w-3xl text-sm font-medium text-tinta/70">
+      Inbound, outbound y abandono clasificados como llamada <strong>APTA</strong> o <strong>NO APTA</strong>
+      según el resultado de retención. Todo en una sola vista, con filtros de mes, cabina,
+      clasificación y producto.
     </p>
-    <p>Filtros globales: mes, cabina, clasificación y producto. Todo en una sola vista, sin scroll.</p>
+    <div class="flex flex-wrap gap-2">
+      <a href="/gestion-diaria" class="rounded-2xl bg-xuma-azul px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:scale-[1.02] dark:bg-xuma-verde-claro dark:text-[#0a1030]">
+        Ver gestión diaria
+      </a>
+      <a href="/abandono" class="glass rounded-2xl px-5 py-2.5 text-sm font-bold transition hover:scale-[1.02]">
+        Ver abandono
+      </a>
+    </div>
   </div>
-</Layout>
+</DashboardLayout>

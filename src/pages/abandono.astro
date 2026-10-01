@@ -1,7 +1,7 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { AbandonoView } from '../components/AbandonoView.jsx';
+import DashboardLayout from '../layouts/DashboardLayout.astro';
+import AbandonoApp from '../components/abandono/AbandonoApp.jsx';
 ---
-<Layout title="Abandono — GasCaribe" active="abandono">
-  <AbandonoView gasera="GasCaribe" client:load />
-</Layout>
+<DashboardLayout title="Abandono — GasCaribe">
+  <AbandonoApp gasera="GasCaribe" client:load />
+</DashboardLayout>
