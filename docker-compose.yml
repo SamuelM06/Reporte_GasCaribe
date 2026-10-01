@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    ports:
+      - "4321:4321"
+    env_file:
+      - .env
+    environment:
+      DB_SCHEMA: gestion_diaria
+    restart: unless-stopped
