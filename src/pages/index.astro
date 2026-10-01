@@ -46,7 +46,7 @@ const cards = [
     {dbError ? <p class="text-sm font-bold text-red-500">{dbError}</p> : null}
     <div class="grid gap-3 md:grid-cols-2">
       {cards.map((c) => (
-        <a key={c.href} href={c.href} class="glass glass-hover group rounded-3xl p-5 transition-all hover:scale-[1.01]">
+        <a href={c.href} class="glass glass-hover group rounded-3xl p-5 transition-all hover:scale-[1.01]">
           <div class="flex items-baseline justify-between gap-2">
             <h2 class="text-xl font-extrabold">{c.titulo}</h2>
             <span class="text-2xl font-black tabular-nums text-xuma-azul dark:text-xuma-verde-claro">{c.num}</span>
