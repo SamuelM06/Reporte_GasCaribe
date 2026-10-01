@@ -63,7 +63,7 @@ export default function GestionApp({ gasera }: { gasera: string }) {
   }, [gasera, f, tab]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2">
+    <div className="flex h-[calc(100dvh-150px)] min-h-[560px] flex-col gap-2">
       <FiltrosBar opciones={op} valor={f} onChange={setF} onReset={() => setF(FILTRO_VACIO)} />
       <div className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
         <KpiCard titulo="Total general" valor={kpis?.total_general ?? 0} icono={<PhoneCall />} acento="azul" />

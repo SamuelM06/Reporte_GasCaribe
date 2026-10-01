@@ -1,7 +1,10 @@
 ---
 import DashboardLayout from '../layouts/DashboardLayout.astro';
 import AbandonoApp from '../components/abandono/AbandonoApp.jsx';
+import { ErrorBoundary } from '../components/ui2/ErrorBoundary.jsx';
 ---
 <DashboardLayout title="Abandono — GasCaribe">
-  <AbandonoApp gasera="GasCaribe" client:load />
+  <ErrorBoundary client:load>
+    <AbandonoApp gasera="GasCaribe" client:load />
+  </ErrorBoundary>
 </DashboardLayout>

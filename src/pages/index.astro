@@ -1,26 +1,59 @@
 ---
 import DashboardLayout from '../layouts/DashboardLayout.astro';
+import { query } from '../lib/db/pool.js';
+
+let stats = { inbound: 0, outbound: 0, abandono: 0, aptas: 0, ret: 0 };
+let dbError = '';
+try {
+  const r = await query<{ inbound: number; outbound: number; abandono: number; aptas: number; ret: number }>(`
+    SELECT (SELECT COUNT(*)::int FROM gestion_diaria.caribe_inbound) AS inbound,
+           (SELECT COUNT(*)::int FROM gestion_diaria.caribe_outbound) AS outbound,
+           (SELECT COUNT(*)::int FROM gestion_diaria.caribe_abandono) AS abandono,
+           (SELECT COUNT(*)::int FROM gestion_diaria.caribe_inbound WHERE clasificacion='APTA')
+           + (SELECT COUNT(*)::int FROM gestion_diaria.caribe_outbound WHERE clasificacion='APTA') AS aptas,
+           (SELECT COUNT(*)::int FROM gestion_diaria.caribe_inbound WHERE resultado_normalizado IN ('retenido','cancelado + venta'))
+           + (SELECT COUNT(*)::int FROM gestion_diaria.caribe_outbound WHERE resultado_normalizado IN ('retenido','cancelado + venta')) AS ret`);
+  stats = r[0] as typeof stats;
+} catch {
+  dbError = 'Sin conexión a la base de datos en este momento.';
+}
+
+const cards = [
+  { href: '/gestion-diaria', titulo: 'Gestión diaria', desc: 'KPIs, tendencia, tablas por resultado, aseguradora, producto y cabina.', num: (stats.inbound + stats.outbound).toLocaleString('es-CO'), tag: '8.102 registros' },
+  { href: '/abandono', titulo: 'Abandono', desc: 'Únicos, duplicados, gestionados por inbound, mapa de calor por hora.', num: stats.abandono.toLocaleString('es-CO'), tag: 'llamadas' },
+];
 ---
-<DashboardLayout title="Reporte GasCaribe | Gases del Caribe">
-  <div class="glass flex h-full flex-col justify-center gap-3 rounded-3xl p-6">
-    <p class="text-xs font-extrabold uppercase tracking-widest text-xuma-verde-oscuro dark:text-xuma-verde-claro">
-      Gases del Caribe · Enero – Septiembre 2026
-    </p>
-    <h1 class="bg-gradient-to-r from-xuma-azul via-xuma-azul-3 to-xuma-verde-oscuro bg-clip-text text-3xl font-black tracking-tight text-transparent md:text-5xl dark:from-white dark:via-xuma-verde-claro dark:to-xuma-verde-oscuro">
-      Reporte de gestión diaria de retenciones
+<DashboardLayout title="Dashboard · Gestión Diaria Gases del Caribe">
+  <div class="glass relative flex h-full flex-col justify-center gap-4 overflow-hidden rounded-3xl p-6 md:p-10">
+    <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-xuma-verde-oscuro/20 blur-3xl dark:bg-xuma-verde-claro/10"></div>
+    <div class="pointer-events-none absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-xuma-azul/20 blur-3xl"></div>
+    <div class="flex items-center gap-4">
+      <img src="/logos/Transparente_Logo_azul_letra_azul.svg" alt="Xuma" class="h-14 w-auto dark:hidden" />
+      <img src="/logos/Transparente_Logo_blanco_letra_blanca.svg" alt="Xuma" class="hidden h-14 w-auto dark:block" />
+      <span class="rounded-full bg-xuma-verde-oscuro/15 px-3 py-1 text-[11px] font-extrabold uppercase tracking-widest text-xuma-verde-oscuro dark:text-xuma-verde-claro">
+        Enero – Septiembre 2026
+      </span>
+    </div>
+    <h1 class="bg-gradient-to-r from-xuma-azul via-xuma-azul-3 to-xuma-verde-oscuro bg-clip-text text-3xl font-black tracking-tight text-transparent md:text-6xl dark:from-white dark:via-xuma-verde-claro dark:to-xuma-verde-oscuro">
+      Dashboard · Gestión Diaria<br />Gases del Caribe
     </h1>
-    <p class="max-w-3xl text-sm font-medium text-tinta/70">
-      Inbound, outbound y abandono clasificados como llamada <strong>APTA</strong> o <strong>NO APTA</strong>
-      según el resultado de retención. Todo en una sola vista, con filtros de mes, cabina,
-      clasificación y producto.
+    <p class="max-w-3xl text-sm font-medium text-tinta/70 md:text-base">
+      Inbound, outbound y abandono clasificados como llamada <strong>APTA</strong> o <strong>NO APTA</strong> según el
+      resultado de retención. {stats.aptas.toLocaleString('es-CO')} llamadas aptas y {stats.ret.toLocaleString('es-CO')} retenciones
+      en el periodo.
     </p>
-    <div class="flex flex-wrap gap-2">
-      <a href="/gestion-diaria" class="rounded-2xl bg-xuma-azul px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:scale-[1.02] dark:bg-xuma-verde-claro dark:text-[#0a1030]">
-        Ver gestión diaria
-      </a>
-      <a href="/abandono" class="glass rounded-2xl px-5 py-2.5 text-sm font-bold transition hover:scale-[1.02]">
-        Ver abandono
-      </a>
+    {dbError ? <p class="text-sm font-bold text-red-500">{dbError}</p> : null}
+    <div class="grid gap-3 md:grid-cols-2">
+      {cards.map((c) => (
+        <a key={c.href} href={c.href} class="glass glass-hover group rounded-3xl p-5 transition-all hover:scale-[1.01]">
+          <div class="flex items-baseline justify-between gap-2">
+            <h2 class="text-xl font-extrabold">{c.titulo}</h2>
+            <span class="text-2xl font-black tabular text-xuma-azul dark:text-xuma-verde-claro">{c.num}</span>
+          </div>
+          <p class="mt-1 text-sm text-tinta/65">{c.desc}</p>
+          <span class="mt-2 inline-block rounded-full bg-tinta/10 px-2.5 py-0.5 text-[11px] font-bold">{c.tag}</span>
+        </a>
+      ))}
     </div>
   </div>
 </DashboardLayout>

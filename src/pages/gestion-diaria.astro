@@ -1,7 +1,10 @@
 ---
 import DashboardLayout from '../layouts/DashboardLayout.astro';
 import GestionApp from '../components/gestion/GestionApp.jsx';
+import { ErrorBoundary } from '../components/ui2/ErrorBoundary.jsx';
 ---
 <DashboardLayout title="Gestión diaria — GasCaribe">
-  <GestionApp gasera="GasCaribe" client:load />
+  <ErrorBoundary client:load>
+    <GestionApp gasera="GasCaribe" client:load />
+  </ErrorBoundary>
 </DashboardLayout>
