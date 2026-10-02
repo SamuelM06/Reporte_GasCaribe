@@ -61,7 +61,7 @@ export default function SelectXuma({ valor, opciones, alCambiar, placeholder, et
       >
         {icono && <span className="shrink-0 text-tinta/60">{icono}</span>}
         <span className={`truncate text-left ${valor ? '' : 'text-tinta/40'}`}>
-          {valor ? (actual?.etiqueta ?? valor) : etiquetaTodo}
+          {valor ? (actual?.etiqueta ?? valor) : placeholder}
         </span>
         <ChevronDown className={`ml-auto shrink-0 text-tinta/60 transition-transform duration-300 ${compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} ${abierto ? 'rotate-180' : ''}`} />
       </button>

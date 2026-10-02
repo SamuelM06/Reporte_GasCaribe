@@ -28,29 +28,60 @@ export interface TrendPunto {
 const short = (m: string) => m.split(' ')[0].slice(0, 3);
 
 // Etiqueta negrita con píldora translúcida del color de la serie (queda bien en claro y oscuro).
+// OJO recharts: a content personalizado le llegan x/y del elemento, NO el ancla;
+// el ancla real se calcula aquí desde viewBox (geometría del sector/punto).
 function etiquetaFondo(color: string, fmt: (v: unknown) => string = (v) => String(v ?? ''), lado: 'arriba' | 'derecha' = 'arriba') {
   return (props: unknown) => {
     const p = (props ?? {}) as Record<string, unknown>;
-    const x = Number(p.x ?? 0);
-    const y = Number(p.y ?? 0);
+    const vb = (p.viewBox ?? {}) as { x?: unknown; y?: unknown; width?: unknown; height?: unknown };
+    const nums = [vb.x, vb.y, vb.width, vb.height].map((v) => (typeof v === 'number' ? v : NaN));
+    const caja = nums.every((v) => !Number.isNaN(v));
     const texto = fmt(p.value);
     const w = texto.length * 6.8 + 14;
     const h = 18;
     if (lado === 'derecha') {
+      const ax = caja ? (nums[0] as number) + (nums[2] as number) : Number(p.x ?? 0);
+      const ay = caja ? (nums[1] as number) + (nums[3] as number) / 2 : Number(p.y ?? 0);
       return (
         <g>
-          <rect x={x + 3} y={y - h / 2} width={w} height={h} rx={h / 2} fill={color} fillOpacity={0.22} />
-          <text x={x + 3 + w / 2} y={y + 0.5} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="currentColor">{texto}</text>
+          <rect x={ax + 4} y={ay - h / 2} width={w} height={h} rx={h / 2} fill={color} fillOpacity={0.22} />
+          <text x={ax + 4 + w / 2} y={ay + 0.5} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="currentColor">{texto}</text>
         </g>
       );
     }
+    const ax = caja ? (nums[0] as number) + (nums[2] as number) / 2 : Number(p.x ?? 0);
+    const ay = caja ? (nums[1] as number) : Number(p.y ?? 0);
     return (
       <g>
-        <rect x={x - w / 2} y={y - h - 3} width={w} height={h} rx={h / 2} fill={color} fillOpacity={0.22} />
-        <text x={x} y={y - 3 - h / 2 + 0.5} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="currentColor">{texto}</text>
+        <rect x={ax - w / 2} y={ay - h - 4} width={w} height={h} rx={h / 2} fill={color} fillOpacity={0.22} />
+        <text x={ax} y={ay - 4 - h / 2 + 0.5} textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={800} fill="currentColor">{texto}</text>
       </g>
     );
   };
+}
+
+// Valor dentro de cada porción de la dona (blanco negrita sobre el color).
+function etiquetaDona(props: unknown) {
+  const p = (props ?? {}) as Record<string, unknown>;
+  const vb = (p.viewBox ?? {}) as Record<string, unknown>;
+  const num = (v: unknown): number => (typeof v === 'number' ? v : 0);
+  const cx = num(vb.cx ?? p.cx);
+  const cy = num(vb.cy ?? p.cy);
+  const ri = num(vb.innerRadius ?? p.innerRadius);
+  const ro = num(vb.outerRadius ?? p.outerRadius);
+  const a0 = num(vb.startAngle ?? p.startAngle);
+  const a1 = num(vb.endAngle ?? p.endAngle);
+  const mid = ((a0 + a1) / 2) * (Math.PI / 180);
+  const r = ri + (ro - ri) / 2;
+  const x = cx + r * Math.cos(-mid);
+  const y = cy + r * Math.sin(-mid);
+  const v = p.value;
+  const texto = typeof v === 'number' ? v.toLocaleString('es-CO') : String(v ?? '');
+  return (
+    <text x={x} y={y} textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={800} fill="#fff">
+      {texto}
+    </text>
+  );
 }
 
 export function TrendRetencion({ data }: { data: TrendPunto[] }) {
@@ -127,7 +158,7 @@ export function DonutCabinas({ data }: { data: Array<{ etiqueta: string; n: numb
     <div className="flex h-full items-center gap-3">
       <ResponsiveContainer width="45%" height="100%">
         <PieChart>
-          <Pie data={data} dataKey="n" nameKey="etiqueta" innerRadius="62%" outerRadius="92%" paddingAngle={2} animationDuration={800}>
+          <Pie data={data} dataKey="n" nameKey="etiqueta" innerRadius="62%" outerRadius="92%" paddingAngle={2} animationDuration={800} label={etiquetaDona} labelLine={false}>
             {data.map((_, i) => (
               <Cell key={i} fill={colores[i % colores.length]} />
             ))}
