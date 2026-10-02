@@ -137,7 +137,7 @@ export default function GestionApp({ gasera }: { gasera: string }) {
               <Panel titulo="Retenciones por cabina" subtitulo="IN vs OUT">
                 <CabinasLines data={cabLine} />
               </Panel>
-              <Panel titulo="Proporción por cabina" subtitulo="Operador">
+              <Panel titulo="Proporción por cabina" subtitulo="IN vs OUT por operador">
                 <DonutCabinas data={donut} />
               </Panel>
               <Panel titulo="Top productos" subtitulo="Normalizado">

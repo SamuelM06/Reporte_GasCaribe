@@ -94,26 +94,33 @@ export function CabinasLines({ data }: { data: CabinaSerie[] }) {
   );
 }
 
-export function DonutCabinas({ data }: { data: Array<{ cabina: string; n: number }> }) {
-  const top = data.slice(0, 7);
-  const total = data.reduce((a, d) => a + d.n, 0) || 1;
+// Dona por cabina partida en IN vs OUT: una porción por cabina×origen con % del total.
+export function DonutCabinas({ data }: { data: Array<{ cabina: string; src: string; n: number }> }) {
+  const slices = data.map((d) => ({
+    ...d,
+    etiqueta: `${d.cabina} ${d.src === 'in' ? 'IN' : 'OUT'}`,
+  }));
+  const top = slices.slice(0, 14);
+  const cabinas = [...new Set(slices.map((d) => d.cabina))];
+  const colorDe = (cabina: string): string => CHART_COLORS[cabinas.indexOf(cabina) % CHART_COLORS.length];
+  const total = slices.reduce((a, d) => a + d.n, 0) || 1;
   return (
     <div className="flex h-full items-center gap-3">
       <ResponsiveContainer width="45%" height="100%">
         <PieChart>
-          <Pie data={top} dataKey="n" nameKey="cabina" innerRadius="62%" outerRadius="92%" paddingAngle={2} animationDuration={800}>
-            {top.map((_, i) => (
-              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+          <Pie data={top} dataKey="n" nameKey="etiqueta" innerRadius="62%" outerRadius="92%" paddingAngle={2} animationDuration={800}>
+            {top.map((d) => (
+              <Cell key={d.etiqueta} fill={colorDe(d.cabina)} fillOpacity={d.src === 'in' ? 1 : 0.45} />
             ))}
           </Pie>
           <Tooltip contentStyle={GLASS_TOOLTIP} />
         </PieChart>
       </ResponsiveContainer>
       <div className="flex min-w-0 flex-1 flex-col gap-1 overflow-auto text-xs font-bold">
-        {top.map((d, i) => (
-          <span key={d.cabina} className="truncate">
-            <span className="mr-1.5 inline-block h-2.5 w-2.5 rounded" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-            {d.cabina} — {d.n.toLocaleString('es-CO')} ({((d.n / total) * 100).toFixed(1)}%)
+        {top.map((d) => (
+          <span key={d.etiqueta} className="truncate" title={`${d.etiqueta} — ${d.n.toLocaleString('es-CO')} (${((d.n / total) * 100).toFixed(1)}%)`}>
+            <span className="mr-1.5 inline-block h-2.5 w-2.5 rounded" style={{ background: colorDe(d.cabina), opacity: d.src === 'in' ? 1 : 0.45 }} />
+            {d.etiqueta} — {d.n.toLocaleString('es-CO')} ({((d.n / total) * 100).toFixed(1)}%)
           </span>
         ))}
       </div>
