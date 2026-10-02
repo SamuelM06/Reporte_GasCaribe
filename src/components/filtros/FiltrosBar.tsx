@@ -42,12 +42,14 @@ export default function FiltrosBar({
   onChange,
   onReset,
   conProducto = true,
+  conCabina = true,
 }: {
   opciones: Opciones | null;
   valor: FiltroValor;
   onChange: (v: FiltroValor) => void;
   onReset: () => void;
   conProducto?: boolean;
+  conCabina?: boolean;
 }) {
   const set = (k: keyof FiltroValor) => (vv: string) => onChange({ ...valor, [k]: vv });
   const activos = [valor.mes, valor.cabina, valor.clasificacion, valor.producto].filter(Boolean).length;
@@ -68,10 +70,14 @@ export default function FiltrosBar({
         desplegableClase="w-full"
       />
       </div>
+      {conCabina && (
       <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.cabina}
-        opciones={(opciones?.cabinas ?? []).map((c) => ({ valor: c.cabina, etiqueta: cap(c.cabina) }))}
+        opciones={[
+          { valor: 'in', etiqueta: 'Cabina Inbound' },
+          { valor: 'out', etiqueta: 'Cabina Outbound' },
+        ]}
         alCambiar={set('cabina')}
         placeholder="Cabina"
         icono={<Building2 className="h-4 w-4" />}
@@ -79,6 +85,7 @@ export default function FiltrosBar({
         desplegableClase="w-full"
       />
       </div>
+      )}
       <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.clasificacion}

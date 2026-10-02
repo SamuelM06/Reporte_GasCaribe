@@ -12,8 +12,18 @@ export const GET: APIRoute = async ({ params, url }) => {
   if (!cfg) return bad('gasera no registrada', 404);
   const { f, error } = leerFiltros(url);
   if (error || !f) return bad(error ?? 'filtros invalidos');
-  const w1 = whereGestion(f, '', 1);
-  const w2 = whereGestion(f, '', w1.params.length + 1);
+  const partes: string[] = [];
+  const args: unknown[] = [];
+  if (!f.cabina || f.cabina === 'in') {
+    const w = whereGestion(f, '', args.length + 1);
+    partes.push(`SELECT 'in' AS src, anio, mes, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.inbound)} ${w.where}`);
+    args.push(...w.params);
+  }
+  if (!f.cabina || f.cabina === 'out') {
+    const w = whereGestion(f, '', args.length + 1);
+    partes.push(`SELECT 'out' AS src, anio, mes, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.outbound)} ${w.where}`);
+    args.push(...w.params);
+  }
   const rows = await query(
     `SELECT anio, mes,
        COUNT(*) FILTER (WHERE src='in')::int AS inbound,
@@ -21,12 +31,8 @@ export const GET: APIRoute = async ({ params, url }) => {
        COUNT(*) FILTER (WHERE ${RET})::int AS retenciones,
        COUNT(*) FILTER (WHERE clasificacion='APTA')::int AS aptos,
        ROUND(COALESCE(COUNT(*) FILTER (WHERE ${RET})::numeric / NULLIF(COUNT(*) FILTER (WHERE clasificacion='APTA'),0),0),4)::float AS pct_retencion
-     FROM (
-       SELECT 'in' AS src, anio, mes, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.inbound)} ${w1.where}
-       UNION ALL
-       SELECT 'out', anio, mes, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.outbound)} ${w2.where}
-     ) u GROUP BY 1, 2 ORDER BY 1, ${orderMeses()}`,
-    [...w1.params, ...w2.params],
+     FROM (${partes.join(' UNION ALL ')}) u GROUP BY 1, 2 ORDER BY 1, ${orderMeses()}`,
+    args,
   );
   return json(rows);
 };

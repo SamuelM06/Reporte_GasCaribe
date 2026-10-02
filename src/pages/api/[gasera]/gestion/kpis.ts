@@ -14,8 +14,19 @@ export const GET: APIRoute = async ({ params, url }) => {
   const { f, error } = leerFiltros(url);
   if (error || !f) return bad(error ?? 'filtros invalidos');
 
-  const w1 = whereGestion(f, '', 1);
-  const w2 = whereGestion(f, '', w1.params.length + 1);
+  // Cabina = origen: solo la mitad pedida ('in'|'out'); sin filtro, ambas.
+  const partes: string[] = [];
+  const args: unknown[] = [];
+  if (!f.cabina || f.cabina === 'in') {
+    const w = whereGestion(f, '', args.length + 1);
+    partes.push(`SELECT 'in' AS src, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.inbound)} ${w.where}`);
+    args.push(...w.params);
+  }
+  if (!f.cabina || f.cabina === 'out') {
+    const w = whereGestion(f, '', args.length + 1);
+    partes.push(`SELECT 'out' AS src, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.outbound)} ${w.where}`);
+    args.push(...w.params);
+  }
   const rows = await query(
     `SELECT
        COUNT(*)::int AS total_general,
@@ -25,12 +36,8 @@ export const GET: APIRoute = async ({ params, url }) => {
        COUNT(*) FILTER (WHERE clasificacion = 'NO APTA')::int AS no_aptas,
        COUNT(*) FILTER (WHERE ${RET})::int AS retenciones,
        ROUND(COALESCE(COUNT(*) FILTER (WHERE ${RET})::numeric / NULLIF(COUNT(*) FILTER (WHERE clasificacion = 'APTA'), 0), 0), 4)::float AS pct_retencion
-     FROM (
-       SELECT 'in' AS src, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.inbound)} ${w1.where}
-       UNION ALL
-       SELECT 'out', clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.outbound)} ${w2.where}
-     ) u`,
-    [...w1.params, ...w2.params],
+     FROM (${partes.join(' UNION ALL ')}) u`,
+    args,
   );
   const ab = await query(
     `SELECT COUNT(DISTINCT telefono)::int AS unicos FROM ${qid(cfg.tablas.abandono)} WHERE telefono IS NOT NULL`,

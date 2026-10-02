@@ -11,9 +11,7 @@ export const GET: APIRoute = async ({ params }) => {
   const meses = await query(
     `SELECT anio, mes FROM (SELECT DISTINCT anio, mes FROM (SELECT anio, mes FROM ${qid(cfg.tablas.inbound)} UNION SELECT anio, mes FROM ${qid(cfg.tablas.outbound)}) d) u ORDER BY 1, ${orderMeses()}`,
   );
-  const cabinas = await query(
-    `SELECT DISTINCT COALESCE(operador, 'SIN REGISTRO') AS cabina FROM (SELECT operador FROM ${qid(cfg.tablas.inbound)} UNION ALL SELECT operador FROM ${qid(cfg.tablas.outbound)}) u ORDER BY 1`,
-  );
+  const cabinas = [{ cabina: 'in' }, { cabina: 'out' }];
   const productos = await query(
     `SELECT DISTINCT gestion_diaria.normalizar_producto(producto) AS producto FROM (SELECT producto FROM ${qid(cfg.tablas.inbound)} UNION ALL SELECT producto FROM ${qid(cfg.tablas.outbound)}) u ORDER BY 1`,
   );

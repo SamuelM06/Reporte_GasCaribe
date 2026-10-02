@@ -12,15 +12,21 @@ export const GET: APIRoute = async ({ params, url }) => {
   if (error || !f) return bad(error ?? 'filtros invalidos');
   const { producto: _omit, ...sinProd } = f;
   void _omit;
-  const w1 = whereGestion(sinProd, '', 1);
-  const w2 = whereGestion(sinProd, '', w1.params.length + 1);
+  const partes: string[] = [];
+  const args: unknown[] = [];
+  if (!f.cabina || f.cabina === 'in') {
+    const w = whereGestion(sinProd, '', args.length + 1);
+    partes.push(`SELECT gestion_diaria.normalizar_producto(producto) AS prod FROM ${qid(cfg.tablas.inbound)} ${w.where}`);
+    args.push(...w.params);
+  }
+  if (!f.cabina || f.cabina === 'out') {
+    const w = whereGestion(sinProd, '', args.length + 1);
+    partes.push(`SELECT gestion_diaria.normalizar_producto(producto) AS prod FROM ${qid(cfg.tablas.outbound)} ${w.where}`);
+    args.push(...w.params);
+  }
   const rows = await query(
-    `SELECT prod AS producto, COUNT(*)::int AS n FROM (
-       SELECT gestion_diaria.normalizar_producto(producto) AS prod FROM ${qid(cfg.tablas.inbound)} ${w1.where}
-       UNION ALL
-       SELECT gestion_diaria.normalizar_producto(producto) FROM ${qid(cfg.tablas.outbound)} ${w2.where}
-     ) u GROUP BY 1 ORDER BY 2 DESC LIMIT 10`,
-    [...w1.params, ...w2.params],
+    `SELECT prod AS producto, COUNT(*)::int AS n FROM (${partes.join(' UNION ALL ')}) u GROUP BY 1 ORDER BY 2 DESC LIMIT 10`,
+    args,
   );
   return json(rows);
 };

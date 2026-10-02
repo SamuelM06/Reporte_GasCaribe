@@ -71,7 +71,6 @@ export default function GestionApp({ gasera }: { gasera: string }) {
   const [kpis, setKpis] = useState<Record<string, number> | null>(null);
   const [trend, setTrend] = useState([]);
   const [cabLine, setCabLine] = useState([]);
-  const [donut, setDonut] = useState([]);
   const [prods, setProds] = useState([]);
   const [mensual, setMensual] = useState([]);
   const [aptos, setAptos] = useState<DetalleRow[]>([]);
@@ -88,7 +87,6 @@ export default function GestionApp({ gasera }: { gasera: string }) {
     if (tab === 'tendencia') {
       get(`/api/${gasera}/gestion/tendencia?${q}`).then(setTrend).catch(() => setTrend([]));
       get(`/api/${gasera}/gestion/retenciones-cabina?${q}`).then(setCabLine).catch(() => setCabLine([]));
-      get(`/api/${gasera}/gestion/cabinas?${q}`).then(setDonut).catch(() => setDonut([]));
       get(`/api/${gasera}/gestion/productos?${q}`).then(setProds).catch(() => setProds([]));
     } else {
       get(`/api/${gasera}/gestion/gestion-mensual?${q}`).then(setMensual).catch(() => setMensual([]));
@@ -100,6 +98,15 @@ export default function GestionApp({ gasera }: { gasera: string }) {
 
   const pivAptos = pivotarDetalle(aptos);
   const pivNo = pivotarDetalle(noaptos);
+
+  // Proporción por cabina: % inbound vs % outbound (viene de los KPIs ya filtrados).
+  const totCab = (kpis?.inbound ?? 0) + (kpis?.outbound ?? 0) || 1;
+  const pctIn = (((kpis?.inbound ?? 0) / totCab) * 100).toFixed(1);
+  const pctOut = (((kpis?.outbound ?? 0) / totCab) * 100).toFixed(1);
+  const donut = [
+    { etiqueta: 'Cabina Inbound', n: kpis?.inbound ?? 0 },
+    { etiqueta: 'Cabina Outbound', n: kpis?.outbound ?? 0 },
+  ];
 
   return (
     <div className="flex h-[calc(100dvh-150px)] min-h-[560px] flex-col gap-2">
@@ -137,7 +144,7 @@ export default function GestionApp({ gasera }: { gasera: string }) {
               <Panel titulo="Retenciones por cabina" subtitulo="IN vs OUT">
                 <CabinasLines data={cabLine} />
               </Panel>
-              <Panel titulo="Proporción por cabina" subtitulo="IN vs OUT por operador">
+              <Panel titulo="Proporción por cabina" subtitulo={`${pctIn}% inbound · ${pctOut}% outbound`}>
                 <DonutCabinas data={donut} />
               </Panel>
               <Panel titulo="Top productos" subtitulo="Normalizado">

@@ -10,15 +10,21 @@ export const GET: APIRoute = async ({ params, url }) => {
   if (!cfg) return bad('gasera no registrada', 404);
   const { f, error } = leerFiltros(url);
   if (error || !f) return bad(error ?? 'filtros invalidos');
-  const w1 = whereGestion(f, '', 1);
-  const w2 = whereGestion(f, '', w1.params.length + 1);
+  const partes: string[] = [];
+  const args: unknown[] = [];
+  if (!f.cabina || f.cabina === 'in') {
+    const w = whereGestion(f, '', args.length + 1);
+    partes.push(`SELECT gestion_diaria.normalizar_aseguradora(aseguradora) AS aseg, anio, mes FROM ${qid(cfg.tablas.inbound)} ${w.where}`);
+    args.push(...w.params);
+  }
+  if (!f.cabina || f.cabina === 'out') {
+    const w = whereGestion(f, '', args.length + 1);
+    partes.push(`SELECT gestion_diaria.normalizar_aseguradora(aseguradora) AS aseg, anio, mes FROM ${qid(cfg.tablas.outbound)} ${w.where}`);
+    args.push(...w.params);
+  }
   const rows = await query(
-    `SELECT aseg, anio, mes, COUNT(*)::int AS n FROM (
-       SELECT gestion_diaria.normalizar_aseguradora(aseguradora) AS aseg, anio, mes FROM ${qid(cfg.tablas.inbound)} ${w1.where}
-       UNION ALL
-       SELECT gestion_diaria.normalizar_aseguradora(aseguradora), anio, mes FROM ${qid(cfg.tablas.outbound)} ${w2.where}
-     ) u GROUP BY 1, 2, 3 ORDER BY 4 DESC, 2, ${orderMeses()}`,
-    [...w1.params, ...w2.params],
+    `SELECT aseg, anio, mes, COUNT(*)::int AS n FROM (${partes.join(' UNION ALL ')}) u GROUP BY 1, 2, 3 ORDER BY 4 DESC, 2, ${orderMeses()}`,
+    args,
   );
   return json(rows);
 };

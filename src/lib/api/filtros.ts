@@ -6,7 +6,8 @@ export const MESES_ES = [
 export interface Filtros {
   anio?: number;
   mesNombre?: string;
-  cabina?: string;
+  // Cabina = tabla origen: 'in' (caribe_inbound) u 'out' (caribe_outbound).
+  cabina?: 'in' | 'out';
   clasificacion?: 'APTA' | 'NO APTA';
   producto?: string;
 }
@@ -28,7 +29,12 @@ export function leerFiltros(url: URL): { f?: Filtros; error?: string } {
     if (!Number.isInteger(n) || n < 1 || n > 12) return { error: 'mes invalido (1-12)' };
     f.mesNombre = MESES_ES[n - 1];
   }
-  if (cabina) f.cabina = cabina;
+  if (cabina) {
+    const c = cabina.trim().toLowerCase();
+    if (c === 'in' || c === 'inbound' || c === 'cabina inbound') f.cabina = 'in';
+    else if (c === 'out' || c === 'outbound' || c === 'cabina outbound') f.cabina = 'out';
+    else return { error: 'cabina invalida (in|out)' };
+  }
   if (clas) {
     if (clas !== 'APTA' && clas !== 'NO APTA') return { error: 'clasificacion invalida' };
     f.clasificacion = clas;
@@ -43,7 +49,8 @@ export interface WhereBuilt {
 }
 
 // Filtros sobre inbound/outbound (alias de tabla opcional).
-// Cabina = operador (cabina viene vacia del Excel). Producto via normalizar_producto().
+// Cabina NO filtra por columna: selecciona la tabla origen ('in'/'out').
+// Los endpoints UNION incluyen solo las mitades pedidas. Producto via normalizar_producto().
 export function whereGestion(f: Filtros, alias = '', base = 1): WhereBuilt {
   const p = alias ? `${alias}.` : '';
   const conds: string[] = [];
@@ -56,7 +63,6 @@ export function whereGestion(f: Filtros, alias = '', base = 1): WhereBuilt {
   };
   if (f.anio !== undefined) add((ph) => `${p}anio = ${ph}`, f.anio);
   if (f.mesNombre !== undefined) add((ph) => `${p}mes ILIKE ${ph}`, `${f.mesNombre} %`);
-  if (f.cabina !== undefined) add((ph) => `${p}operador = ${ph}`, f.cabina);
   if (f.clasificacion !== undefined) add((ph) => `${p}clasificacion = ${ph}`, f.clasificacion);
   if (f.producto !== undefined) {
     add((ph) => `gestion_diaria.normalizar_producto(${p}producto) = ${ph}`, f.producto);

@@ -13,15 +13,21 @@ export const GET: APIRoute = async ({ params, url }) => {
   const { f, error } = leerFiltros(url);
   if (error || !f) return bad(error ?? 'filtros invalidos');
   const want = clase === 'apta' ? 'APTA' : 'NO APTA';
-  const w1 = whereGestion({ ...f, clasificacion: want }, '', 1);
-  const w2 = whereGestion({ ...f, clasificacion: want }, '', w1.params.length + 1);
+  const partes: string[] = [];
+  const args: unknown[] = [];
+  if (!f.cabina || f.cabina === 'in') {
+    const w = whereGestion({ ...f, clasificacion: want }, '', args.length + 1);
+    partes.push(`SELECT resultado_normalizado, anio, mes FROM ${qid(cfg.tablas.inbound)} ${w.where}`);
+    args.push(...w.params);
+  }
+  if (!f.cabina || f.cabina === 'out') {
+    const w = whereGestion({ ...f, clasificacion: want }, '', args.length + 1);
+    partes.push(`SELECT resultado_normalizado, anio, mes FROM ${qid(cfg.tablas.outbound)} ${w.where}`);
+    args.push(...w.params);
+  }
   const rows = await query(
-    `SELECT resultado_normalizado, anio, mes, COUNT(*)::int AS n FROM (
-       SELECT resultado_normalizado, anio, mes FROM ${qid(cfg.tablas.inbound)} ${w1.where}
-       UNION ALL
-       SELECT resultado_normalizado, anio, mes FROM ${qid(cfg.tablas.outbound)} ${w2.where}
-     ) u GROUP BY 1, 2, 3 ORDER BY 4 DESC, 2, ${orderMeses()}`,
-    [...w1.params, ...w2.params],
+    `SELECT resultado_normalizado, anio, mes, COUNT(*)::int AS n FROM (${partes.join(' UNION ALL ')}) u GROUP BY 1, 2, 3 ORDER BY 4 DESC, 2, ${orderMeses()}`,
+    args,
   );
   return json(rows);
 };

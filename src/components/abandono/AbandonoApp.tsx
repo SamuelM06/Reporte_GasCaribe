@@ -50,7 +50,7 @@ export default function AbandonoApp({ gasera }: { gasera: string }) {
 
   return (
     <div className="flex h-[calc(100dvh-150px)] min-h-[560px] flex-col gap-2">
-      <FiltrosBar opciones={op} valor={f} onChange={setF} onReset={() => setF(FILTRO_VACIO)} conProducto={false} />
+      <FiltrosBar opciones={op} valor={f} onChange={setF} onReset={() => setF(FILTRO_VACIO)} conProducto={false} conCabina={false} />
       <div className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
         <KpiCard titulo="Total" valor={kpis?.total ?? 0} icono={<PhoneCall />} acento="azul" />
         <KpiCard titulo="Únicos" valor={kpis?.unicos ?? 0} icono={<Users />} acento="violeta" />
