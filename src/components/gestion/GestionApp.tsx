@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
   CircleX,
   PhoneCall,
   PhoneIncoming,
@@ -43,25 +45,92 @@ interface DetalleRow {
   n: number;
 }
 
-// Pivota detalle: filas = meses, columnas = resultados.
-function pivotarDetalle(rows: DetalleRow[]): { columns: string[]; data: Array<Record<string, unknown>> } {
-  const orden = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-  const meses = [...new Set(rows.map((r) => r.mes))].sort(
-    (a, b) => orden.indexOf(a.split(' ')[0]) - orden.indexOf(b.split(' ')[0]),
+// 'SEPTIEMBRE 2026' -> 'Septiembre 2026' (solo primera en mayúscula).
+const tituloMes = (m: string): string => {
+  const t = (m ?? '').trim();
+  return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : '—';
+};
+const primeraMayus = (s: string): string => {
+  const t = (s ?? '').trim();
+  return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : 'Sin registro';
+};
+
+const ORDEN_MES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+function mesesOrdenados(rows: Array<{ mes: string }>): string[] {
+  return [...new Set(rows.map((r) => r.mes))].sort(
+    (a, b) => ORDEN_MES.indexOf(a.split(' ')[0]) - ORDEN_MES.indexOf(b.split(' ')[0]),
   );
+}
+
+// Pivota detalle: filas = meses, columnas = resultados (+ Total).
+function pivotarDetalleXResultado(rows: DetalleRow[]): { columns: string[]; data: Array<Record<string, unknown>> } {
+  const meses = mesesOrdenados(rows);
   const resultados = [...new Set(rows.map((r) => r.resultado_normalizado ?? 'sin registro'))];
+  const colsRes = resultados.map(primeraMayus);
   const data = meses.map((m) => {
-    const fila: Record<string, unknown> = { mes: m };
+    const fila: Record<string, unknown> = { mes: tituloMes(m) };
     let total = 0;
-    for (const res of resultados) {
+    resultados.forEach((res, i) => {
       const n = rows.filter((r) => r.mes === m && (r.resultado_normalizado ?? 'sin registro') === res).reduce((a, r) => a + r.n, 0);
-      fila[res] = n;
+      fila[colsRes[i]] = n;
       total += n;
-    }
+    });
     fila['Total'] = total;
     return fila;
   });
-  return { columns: ['mes', ...resultados, 'Total'], data };
+  return { columns: ['mes', ...colsRes, 'Total'], data };
+}
+
+// Pivota detalle: filas = resultados, columnas = meses (+ Total).
+function pivotarDetalleXMes(rows: DetalleRow[]): { columns: string[]; data: Array<Record<string, unknown>> } {
+  const meses = mesesOrdenados(rows);
+  const colsMes = meses.map(tituloMes);
+  const resultados = [...new Set(rows.map((r) => r.resultado_normalizado ?? 'sin registro'))];
+  const data = resultados.map((res) => {
+    const fila: Record<string, unknown> = { resultado: primeraMayus(res) };
+    let total = 0;
+    meses.forEach((m, i) => {
+      const n = rows.filter((r) => r.mes === m && (r.resultado_normalizado ?? 'sin registro') === res).reduce((a, r) => a + r.n, 0);
+      fila[colsMes[i]] = n;
+      total += n;
+    });
+    fila['Total'] = total;
+    return fila;
+  });
+  const ft: Record<string, unknown> = { resultado: 'Total' };
+  let gran = 0;
+  meses.forEach((m, i) => {
+    const n = rows.filter((r) => r.mes === m).reduce((a, r) => a + r.n, 0);
+    ft[colsMes[i]] = n;
+    gran += n;
+  });
+  ft['Total'] = gran;
+  return { columns: ['resultado', ...colsMes, 'Total'], data: [...data, ft] };
+}
+
+interface AsegRow {
+  aseg: string;
+  mes: string;
+  n: number;
+}
+
+// Pivota aseguradoras: filas = aseguradora, columnas = meses (+ Total).
+function pivotarAseg(rows: AsegRow[]): { columns: string[]; data: Array<Record<string, unknown>> } {
+  const meses = mesesOrdenados(rows);
+  const colsMes = meses.map(tituloMes);
+  const asegs = [...new Set(rows.map((r) => r.aseg ?? 'Sin registro'))];
+  const data = asegs.map((a) => {
+    const fila: Record<string, unknown> = { aseguradora: primeraMayus(a) };
+    let total = 0;
+    meses.forEach((m, i) => {
+      const n = rows.filter((r) => r.mes === m && (r.aseg ?? 'Sin registro') === a).reduce((x, r) => x + r.n, 0);
+      fila[colsMes[i]] = n;
+      total += n;
+    });
+    fila['Total'] = total;
+    return fila;
+  });
+  return { columns: ['aseguradora', ...colsMes, 'Total'], data };
 }
 
 export default function GestionApp({ gasera }: { gasera: string }) {
@@ -75,7 +144,8 @@ export default function GestionApp({ gasera }: { gasera: string }) {
   const [mensual, setMensual] = useState([]);
   const [aptos, setAptos] = useState<DetalleRow[]>([]);
   const [noaptos, setNoaptos] = useState<DetalleRow[]>([]);
-  const [asegs, setAsegs] = useState([]);
+  const [asegs, setAsegs] = useState<AsegRow[]>([]);
+  const [pag, setPag] = useState(0);
 
   useEffect(() => {
     get<Opciones>(`/api/${gasera}/filtros/opciones`).then(setOp).catch(() => {});
@@ -83,6 +153,7 @@ export default function GestionApp({ gasera }: { gasera: string }) {
 
   useEffect(() => {
     const q = qs(f);
+    setPag(0);
     get<Record<string, number>>(`/api/${gasera}/gestion/kpis?${q}`).then(setKpis).catch(() => {});
     if (tab === 'tendencia') {
       get(`/api/${gasera}/gestion/tendencia?${q}`).then(setTrend).catch(() => setTrend([]));
@@ -96,8 +167,9 @@ export default function GestionApp({ gasera }: { gasera: string }) {
     }
   }, [gasera, f, tab]);
 
-  const pivAptos = pivotarDetalle(aptos);
-  const pivNo = pivotarDetalle(noaptos);
+  const pivAptos = pivotarDetalleXResultado(aptos);
+  const pivNo = pivotarDetalleXMes(noaptos);
+  const pivAseg = pivotarAseg(asegs);
 
   // Proporción por cabina: % inbound vs % outbound (viene de los KPIs ya filtrados).
   const totCab = (kpis?.inbound ?? 0) + (kpis?.outbound ?? 0) || 1;
@@ -153,19 +225,47 @@ export default function GestionApp({ gasera }: { gasera: string }) {
             </div>
           </div>
         ) : (
-          <div className="grid h-full min-h-0 grid-cols-1 gap-2 xl:grid-cols-2">
-            <Panel titulo="Gestión mensual">
-              <TablaGlass columns={['mes', 'registros', 'aptos', 'no_aptos', 'canc_venta', 'retenido', 'retenciones', 'pct_retencion']} rows={mensual} headers={H_GESTION} format={(c, v) => (c === 'pct_retencion' ? fmtPct(c, v) : c === 'mes' ? String(v ?? '—') : fmtNum(c, v))} />
-            </Panel>
-            <Panel titulo="Detalle de resultados aptos" subtitulo="Meses × resultados">
-              <TablaGlass columns={pivAptos.columns} rows={pivAptos.data} format={(c, v) => (c === 'mes' ? String(v ?? '—') : fmtNum(c, v))} />
-            </Panel>
-            <Panel titulo="Detalle de resultados no aptos" subtitulo="Meses × resultados">
-              <TablaGlass columns={pivNo.columns} rows={pivNo.data} format={(c, v) => (c === 'mes' ? String(v ?? '—') : fmtNum(c, v))} />
-            </Panel>
-            <Panel titulo="Gestión mensual por aseguradora">
-              <TablaGlass columns={['aseg', 'mes', 'n']} rows={asegs} headers={{ aseg: 'Aseguradora', mes: 'Mes', n: 'Registros' }} format={(c, v) => (c === 'mes' || c === 'aseg' ? String(v ?? '—') : fmtNum(c, v))} />
-            </Panel>
+          <div className="h-full min-h-0 overflow-y-auto">
+            <div className="grid grid-cols-1 gap-2 xl:grid-cols-2">
+              {pag === 0 ? (
+                <>
+                  <Panel titulo="Gestión mensual" auto>
+                    <TablaGlass columns={['mes', 'registros', 'aptos', 'no_aptos', 'canc_venta', 'retenido', 'retenciones', 'pct_retencion']} rows={mensual} headers={H_GESTION} auto format={(c, v) => (c === 'pct_retencion' ? fmtPct(c, v) : c === 'mes' ? tituloMes(String(v ?? '')) : fmtNum(c, v))} />
+                  </Panel>
+                  <Panel titulo="Detalle de resultados aptos" subtitulo="Meses × resultados" auto>
+                    <TablaGlass columns={pivAptos.columns} rows={pivAptos.data} headers={{ mes: 'Mes' }} auto format={(c, v) => (c === 'mes' ? String(v ?? '—') : fmtNum(c, v))} />
+                  </Panel>
+                </>
+              ) : (
+                <>
+                  <Panel titulo="Detalle de resultados no aptos" subtitulo="Resultados × meses" auto>
+                    <TablaGlass columns={pivNo.columns} rows={pivNo.data} headers={{ resultado: 'Resultado' }} auto format={(c, v) => (c === 'resultado' ? String(v ?? '—') : fmtNum(c, v))} />
+                  </Panel>
+                  <Panel titulo="Gestión mensual por aseguradora" subtitulo="Aseguradora × meses" auto>
+                    <TablaGlass columns={pivAseg.columns} rows={pivAseg.data} headers={{ aseguradora: 'Aseguradora' }} auto format={(c, v) => (c === 'aseguradora' ? String(v ?? '—') : fmtNum(c, v))} />
+                  </Panel>
+                </>
+              )}
+            </div>
+            <div className="glass mt-2 flex items-center justify-center gap-3 rounded-2xl px-3 py-1.5">
+              <button
+                onClick={() => setPag(0)}
+                disabled={pag === 0}
+                aria-label="Tablas anteriores"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-tinta transition hover:bg-tinta/10 disabled:opacity-30"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-xs font-bold text-tinta/70">{pag + 1} de 2</span>
+              <button
+                onClick={() => setPag(1)}
+                disabled={pag === 1}
+                aria-label="Tablas siguientes"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-tinta transition hover:bg-tinta/10 disabled:opacity-30"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         )}
       </motion.div>
