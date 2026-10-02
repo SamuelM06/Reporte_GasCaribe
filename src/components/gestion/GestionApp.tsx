@@ -5,7 +5,9 @@ import {
   CircleX,
   PhoneCall,
   PhoneIncoming,
+  PhoneMissed,
   PhoneOutgoing,
+  ShieldCheck,
   Percent,
 } from 'lucide-react';
 import KpiCard from '../KpiCard.jsx';
@@ -106,10 +108,10 @@ export default function GestionApp({ gasera }: { gasera: string }) {
         <KpiCard titulo="Total general" valor={kpis?.total_general ?? 0} icono={<PhoneCall />} acento="azul" />
         <KpiCard titulo="Inbound" valor={kpis?.inbound ?? 0} icono={<PhoneIncoming />} acento="violeta" />
         <KpiCard titulo="Outbound" valor={kpis?.outbound ?? 0} icono={<PhoneOutgoing />} acento="azul" />
-        <KpiCard titulo="Abandono únicos" valor={kpis?.abandono_unicos ?? 0} icono={<PhoneOutgoing />} acento="ambar" />
+        <KpiCard titulo="Abandono" valor={kpis?.abandono_unicos ?? 0} icono={<PhoneMissed />} acento="ambar" />
         <KpiCard titulo="Aptas" valor={kpis?.aptas ?? 0} icono={<BadgeCheck />} acento="verde-oscuro" />
         <KpiCard titulo="No aptas" valor={kpis?.no_aptas ?? 0} icono={<CircleX />} acento="ambar" />
-        <KpiCard titulo="Retenciones" valor={kpis?.retenciones ?? 0} icono={<BadgeCheck />} acento="verde-claro" sub="retenido + canc. + venta" />
+        <KpiCard titulo="Retenciones" valor={kpis?.retenciones ?? 0} icono={<ShieldCheck />} acento="verde-claro" sub="retenido + canc. + venta" />
         <KpiCard titulo="% Retención" valor={(kpis?.pct_retencion ?? 0) * 100} icono={<Percent />} acento="verde-oscuro" sufijo="%" decimales={1} sub="retenciones / aptas" />
       </div>
       <div className="glass flex shrink-0 gap-1 rounded-2xl p-1.5">

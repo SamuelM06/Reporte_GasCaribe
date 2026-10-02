@@ -23,6 +23,9 @@ const MESES = [
   'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE',
 ];
 
+// Solo primera en mayúscula para mostrar (el valor crudo se conserva para el backend).
+const cap = (s: string): string => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
+
 export function qs(v: FiltroValor): string {
   const p = new URLSearchParams();
   if (v.anio) p.set('anio', v.anio);
@@ -57,7 +60,7 @@ export default function FiltrosBar({
       <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.mes}
-        opciones={MESES.map((m, i) => ({ valor: String(i + 1), etiqueta: m }))}
+        opciones={MESES.map((m, i) => ({ valor: String(i + 1), etiqueta: cap(m) }))}
         alCambiar={set('mes')}
         placeholder="Mes"
         icono={<CalendarDays className="h-4 w-4" />}
@@ -68,7 +71,7 @@ export default function FiltrosBar({
       <div className="min-w-[140px] flex-1">
       <SelectXuma
         valor={valor.cabina}
-        opciones={(opciones?.cabinas ?? []).map((c) => ({ valor: c.cabina, etiqueta: c.cabina }))}
+        opciones={(opciones?.cabinas ?? []).map((c) => ({ valor: c.cabina, etiqueta: cap(c.cabina) }))}
         alCambiar={set('cabina')}
         placeholder="Cabina"
         icono={<Building2 className="h-4 w-4" />}
@@ -94,7 +97,7 @@ export default function FiltrosBar({
         <div className="min-w-[140px] flex-1">
         <SelectXuma
           valor={valor.producto}
-          opciones={(opciones?.productos ?? []).map((p) => ({ valor: p.producto, etiqueta: p.producto }))}
+          opciones={(opciones?.productos ?? []).map((p) => ({ valor: p.producto, etiqueta: cap(p.producto) }))}
           alCambiar={set('producto')}
           placeholder="Producto"
           icono={<Package className="h-4 w-4" />}
