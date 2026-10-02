@@ -114,23 +114,31 @@ interface AsegRow {
   n: number;
 }
 
-// Pivota aseguradoras: filas = aseguradora, columnas = meses (+ Total).
+// Pivota aseguradoras: filas = meses, columnas = aseguradora (+ Total).
 function pivotarAseg(rows: AsegRow[]): { columns: string[]; data: Array<Record<string, unknown>> } {
   const meses = mesesOrdenados(rows);
-  const colsMes = meses.map(tituloMes);
   const asegs = [...new Set(rows.map((r) => r.aseg ?? 'Sin registro'))];
-  const data = asegs.map((a) => {
-    const fila: Record<string, unknown> = { aseguradora: primeraMayus(a) };
+  const colsAseg = asegs.map(primeraMayus);
+  const data = meses.map((m) => {
+    const fila: Record<string, unknown> = { mes: tituloMes(m) };
     let total = 0;
-    meses.forEach((m, i) => {
+    asegs.forEach((a, i) => {
       const n = rows.filter((r) => r.mes === m && (r.aseg ?? 'Sin registro') === a).reduce((x, r) => x + r.n, 0);
-      fila[colsMes[i]] = n;
+      fila[colsAseg[i]] = n;
       total += n;
     });
     fila['Total'] = total;
     return fila;
   });
-  return { columns: ['aseguradora', ...colsMes, 'Total'], data };
+  const ft: Record<string, unknown> = { mes: 'Total' };
+  let gran = 0;
+  asegs.forEach((a, i) => {
+    const n = rows.filter((r) => (r.aseg ?? 'Sin registro') === a).reduce((x, r) => x + r.n, 0);
+    ft[colsAseg[i]] = n;
+    gran += n;
+  });
+  ft['Total'] = gran;
+  return { columns: ['mes', ...colsAseg, 'Total'], data: [...data, ft] };
 }
 
 export default function GestionApp({ gasera }: { gasera: string }) {
@@ -241,8 +249,8 @@ export default function GestionApp({ gasera }: { gasera: string }) {
                   <Panel titulo="Detalle de resultados no aptos" subtitulo="Resultados × meses" auto>
                     <TablaGlass columns={pivNo.columns} rows={pivNo.data} headers={{ resultado: 'Resultado' }} auto format={(c, v) => (c === 'resultado' ? String(v ?? '—') : fmtNum(c, v))} />
                   </Panel>
-                  <Panel titulo="Gestión mensual por aseguradora" subtitulo="Aseguradora × meses" auto>
-                    <TablaGlass columns={pivAseg.columns} rows={pivAseg.data} headers={{ aseguradora: 'Aseguradora' }} auto format={(c, v) => (c === 'aseguradora' ? String(v ?? '—') : fmtNum(c, v))} />
+                  <Panel titulo="Gestión mensual por aseguradora" subtitulo="Meses × aseguradora" auto>
+                    <TablaGlass columns={pivAseg.columns} rows={pivAseg.data} headers={{ mes: 'Mes' }} auto format={(c, v) => (c === 'mes' ? String(v ?? '—') : fmtNum(c, v))} />
                   </Panel>
                 </>
               )}
