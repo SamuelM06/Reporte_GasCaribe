@@ -54,7 +54,7 @@ export default function FiltrosBar({
   const set = (k: keyof FiltroValor) => (vv: string) => onChange({ ...valor, [k]: vv });
   const activos = [valor.mes, valor.cabina, valor.clasificacion, valor.producto].filter(Boolean).length;
   return (
-    <div className="glass flex flex-wrap items-stretch gap-2 rounded-2xl p-2">
+    <div className="glass relative z-40 flex flex-wrap items-stretch gap-2 rounded-2xl p-2">
       <span className="flex items-center gap-1.5 px-2 text-xs font-bold text-tinta/60">
         <Filter className="h-4 w-4" /> Filtros
         {activos > 0 && <span className="rounded-full bg-xuma-verde-oscuro px-2 py-0.5 text-[10px] text-white">{activos}</span>}
