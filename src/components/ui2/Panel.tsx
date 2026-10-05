@@ -59,8 +59,8 @@ const COLUMN_ICONS: Record<string, React.ReactNode> = {
 };
 
 const COLUMN_ALIGN: Record<string, 'left' | 'center' | 'right'> = {
-  mes: 'left',
-  resultado: 'left',
+  mes: 'center',
+  resultado: 'center',
   registros: 'center',
   aptos: 'center',
   no_aptos: 'center',
@@ -110,9 +110,9 @@ export function TablaGlass({
                 <th
                   key={c}
                   style={{ width: getWidth(c), minWidth: getWidth(c) }}
-                  className="whitespace-nowrap border-b border-tinta/15 bg-gradient-to-b from-tinta/5 to-transparent px-3 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-tinta/70 dark:text-tinta/60 first:text-left"
+                  className="whitespace-nowrap border-b border-tinta/15 bg-gradient-to-b from-tinta/5 to-transparent px-3 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-tinta/70 dark:text-tinta/60"
                 >
-                  <div className="flex items-center justify-center gap-1.5 first:justify-start">
+                  <div className="flex items-center justify-center gap-1.5">
                     {COLUMN_ICONS[c] && <span className="text-tinta/40 dark:text-tinta/50">{COLUMN_ICONS[c]}</span>}
                     <span>{headers?.[c] ?? c}</span>
                   </div>
@@ -128,12 +128,11 @@ export function TablaGlass({
               >
                 {columns.map((c) => {
                   const align = getAlign(c);
-                  const isFirst = c === columns[0];
-                  const alignClass = isFirst ? 'text-left' : align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center';
+                  const alignClass = align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center';
                   return (
                     <td
                       key={c}
-                      className={`whitespace-nowrap px-3 py-2 font-medium ${alignClass} ${isFirst ? 'font-semibold text-tinta/85' : 'text-tinta/75'}`}
+                      className={`whitespace-nowrap px-3 py-2 font-medium ${alignClass} text-tinta/75`}
                     >
                       {cell(c, r[c])}
                     </td>
