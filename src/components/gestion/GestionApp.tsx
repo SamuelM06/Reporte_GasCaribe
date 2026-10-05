@@ -236,7 +236,7 @@ export default function GestionApp({ gasera }: { gasera: string }) {
           </div>
         ) : (
           <div className="h-full min-h-0 overflow-y-auto">
-            <div className={pag === 0 ? 'grid grid-cols-1 gap-2 xl:grid-cols-2' : 'flex flex-col gap-2'}>
+            <div className="flex flex-col gap-2">
               {pag === 0 ? (
                 <>
                   <Panel titulo="Gestión mensual" auto>

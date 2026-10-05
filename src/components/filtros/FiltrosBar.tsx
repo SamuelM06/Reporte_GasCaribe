@@ -1,4 +1,4 @@
-import { CalendarDays, Filter, RotateCcw, Building2, Tags, Package } from 'lucide-react';
+import { CalendarDays, Filter, RotateCcw, Building2, Tags } from 'lucide-react';
 import SelectXuma from '../ui2/SelectXuma.tsx';
 
 export interface Opciones {
@@ -13,10 +13,9 @@ export interface FiltroValor {
   mes: string;
   cabina: string;
   clasificacion: string;
-  producto: string;
 }
 
-export const FILTRO_VACIO: FiltroValor = { anio: '2026', mes: '', cabina: '', clasificacion: '', producto: '' };
+export const FILTRO_VACIO: FiltroValor = { anio: '2026', mes: '', cabina: '', clasificacion: '' };
 
 const MESES = [
   'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
@@ -32,7 +31,6 @@ export function qs(v: FiltroValor): string {
   if (v.mes) p.set('mes', v.mes);
   if (v.cabina) p.set('cabina', v.cabina);
   if (v.clasificacion) p.set('clasificacion', v.clasificacion);
-  if (v.producto) p.set('producto', v.producto);
   return p.toString();
 }
 
@@ -41,18 +39,16 @@ export default function FiltrosBar({
   valor,
   onChange,
   onReset,
-  conProducto = true,
   conCabina = true,
 }: {
   opciones: Opciones | null;
   valor: FiltroValor;
   onChange: (v: FiltroValor) => void;
   onReset: () => void;
-  conProducto?: boolean;
   conCabina?: boolean;
 }) {
   const set = (k: keyof FiltroValor) => (vv: string) => onChange({ ...valor, [k]: vv });
-  const activos = [valor.mes, valor.cabina, valor.clasificacion, valor.producto].filter(Boolean).length;
+  const activos = [valor.mes, valor.cabina, valor.clasificacion].filter(Boolean).length;
   return (
     <div className="glass relative z-40 flex flex-wrap items-stretch gap-2 rounded-2xl p-2">
       <span className="flex items-center gap-1.5 px-2 text-xs font-bold text-tinta/60">
@@ -100,19 +96,6 @@ export default function FiltrosBar({
         desplegableClase="w-full"
       />
       </div>
-      {conProducto && (
-        <div className="min-w-[140px] flex-1">
-        <SelectXuma
-          valor={valor.producto}
-          opciones={(opciones?.productos ?? []).map((p) => ({ valor: p.producto, etiqueta: cap(p.producto) }))}
-          alCambiar={set('producto')}
-          placeholder="Producto"
-          icono={<Package className="h-4 w-4" />}
-          compact
-          desplegableClase="w-full"
-        />
-        </div>
-      )}
       <button
         onClick={onReset}
         className="ml-auto inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold text-tinta/60 transition hover:bg-tinta/10 hover:text-tinta"
