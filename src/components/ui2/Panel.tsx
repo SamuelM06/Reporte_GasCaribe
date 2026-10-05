@@ -1,4 +1,16 @@
 import { motion } from 'motion/react';
+import {
+  Calendar,
+  Users,
+  CheckCircle,
+  XCircle,
+  ShoppingBag,
+  Shield,
+  TrendingUp,
+  BarChart2,
+  Building,
+  Target,
+} from 'lucide-react';
 
 export function Panel({
   titulo,
@@ -13,7 +25,6 @@ export function Panel({
   children: React.ReactNode;
   className?: string;
   delay?: number;
-  // auto: altura natural sin scroll interno (para vistas con scroll de página).
   auto?: boolean;
 }) {
   return (
@@ -32,6 +43,41 @@ export function Panel({
   );
 }
 
+// Iconos por columna semántica
+const COLUMN_ICONS: Record<string, React.ReactNode> = {
+  mes: <Calendar className="h-3.5 w-3.5" />,
+  registros: <Users className="h-3.5 w-3.5" />,
+  aptos: <CheckCircle className="h-3.5 w-3.5" />,
+  no_aptos: <XCircle className="h-3.5 w-3.5" />,
+  canc_venta: <ShoppingBag className="h-3.5 w-3.5" />,
+  retenido: <Shield className="h-3.5 w-3.5" />,
+  retenciones: <Target className="h-3.5 w-3.5" />,
+  pct_retencion: <TrendingUp className="h-3.5 w-3.5" />,
+  aseguradora: <Building className="h-3.5 w-3.5" />,
+  resultado: <BarChart2 className="h-3.5 w-3.5" />,
+  total: <TrendingUp className="h-3.5 w-3.5" />,
+};
+
+const COLUMN_ALIGN: Record<string, 'left' | 'center' | 'right'> = {
+  mes: 'left',
+  resultado: 'left',
+  registros: 'center',
+  aptos: 'center',
+  no_aptos: 'center',
+  canc_venta: 'center',
+  retenido: 'center',
+  retenciones: 'center',
+  pct_retencion: 'center',
+  aseguradora: 'center',
+  total: 'center',
+};
+
+const COLUMN_WIDTH: Record<string, string> = {
+  mes: '120px',
+  resultado: '160px',
+  pct_retencion: '90px',
+};
+
 export function TablaGlass({
   columns,
   rows,
@@ -43,7 +89,6 @@ export function TablaGlass({
   rows: Array<Record<string, unknown>>;
   headers?: Record<string, string>;
   format?: (col: string, value: unknown) => string;
-  // auto: sin alto fijo ni scroll vertical interno (crece con el contenido).
   auto?: boolean;
 }) {
   const cell = (c: string, v: unknown): string => {
@@ -51,30 +96,54 @@ export function TablaGlass({
     if (v == null) return '—';
     return String(v);
   };
+
+  const getAlign = (c: string) => COLUMN_ALIGN[c] ?? 'center';
+  const getWidth = (c: string) => COLUMN_WIDTH[c] ?? 'auto';
+
   return (
-    <div className={`${auto ? 'overflow-x-auto' : 'h-full overflow-auto'} rounded-xl border border-tinta/10 bg-white/40 shadow-lg backdrop-blur-md dark:bg-white/5`}>
-      <table className="w-full border-collapse text-xs">
-        <thead className="sticky top-0 z-10">
-          <tr>
-            {columns.map((c) => (
-              <th key={c} className="whitespace-nowrap border-b border-white/20 bg-xuma-azul px-2.5 py-2 text-center text-[11px] font-bold text-white shadow first:text-left dark:bg-xuma-azul-2">
-                {headers?.[c] ?? c}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-b border-tinta/10 transition-colors last:border-0 even:bg-tinta/5 hover:bg-tinta/10">
+    <div className={`${auto ? 'overflow-x-auto' : 'h-full overflow-auto'} rounded-xl border border-tinta/10 bg-white/30 shadow-xl backdrop-blur-md dark:bg-white/3`}>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-xs">
+          <thead className="sticky top-0 z-10">
+            <tr>
               {columns.map((c) => (
-                <td key={c} className="whitespace-nowrap px-2.5 py-1.5 text-center font-bold first:text-left">
-                  {cell(c, r[c])}
-                </td>
+                <th
+                  key={c}
+                  style={{ width: getWidth(c), minWidth: getWidth(c) }}
+                  className="whitespace-nowrap border-b border-tinta/15 bg-gradient-to-b from-tinta/5 to-transparent px-3 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-tinta/70 dark:text-tinta/60 first:text-left"
+                >
+                  <div className="flex items-center justify-center gap-1.5 first:justify-start">
+                    {COLUMN_ICONS[c] && <span className="text-tinta/40 dark:text-tinta/50">{COLUMN_ICONS[c]}</span>}
+                    <span>{headers?.[c] ?? c}</span>
+                  </div>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr
+                key={i}
+                className="border-b border-tinta/5 transition-all duration-150 last:border-0 even:bg-tinta/3 hover:bg-tinta/10 dark:even:bg-white/3 dark:hover:bg-white/5"
+              >
+                {columns.map((c) => {
+                  const align = getAlign(c);
+                  const isFirst = c === columns[0];
+                  const alignClass = isFirst ? 'text-left' : align === 'left' ? 'text-left' : align === 'right' ? 'text-right' : 'text-center';
+                  return (
+                    <td
+                      key={c}
+                      className={`whitespace-nowrap px-3 py-2 font-medium ${alignClass} ${isFirst ? 'font-semibold text-tinta/85' : 'text-tinta/75'}`}
+                    >
+                      {cell(c, r[c])}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
