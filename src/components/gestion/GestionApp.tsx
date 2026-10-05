@@ -45,10 +45,12 @@ interface DetalleRow {
   n: number;
 }
 
-// 'SEPTIEMBRE 2026' -> 'Septiembre 2026' (solo primera en mayúscula).
+// 'SEPTIEMBRE 2026' -> 'Septiembre' (solo mes, sin año).
 const tituloMes = (m: string): string => {
   const t = (m ?? '').trim();
-  return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : '—';
+  if (!t) return '—';
+  const soloMes = t.split(' ')[0]; // "ENERO 2026" -> "ENERO"
+  return soloMes.charAt(0).toUpperCase() + soloMes.slice(1).toLowerCase();
 };
 const primeraMayus = (s: string): string => {
   const t = (s ?? '').trim();

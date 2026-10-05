@@ -19,6 +19,7 @@ export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
   integrations: [react()],
+  server: { port: 4323, host: true },
   vite: {
     define: { __BUILD_ID__: JSON.stringify(buildId()) },
     optimizeDeps: {

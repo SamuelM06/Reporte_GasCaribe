@@ -25,7 +25,7 @@ export const GET: APIRoute = async ({ params, url }) => {
     args.push(...w.params);
   }
   const rows = await query(
-    `SELECT prod AS producto, COUNT(*)::int AS n FROM (${partes.join(' UNION ALL ')}) u GROUP BY 1 ORDER BY 2 DESC LIMIT 10`,
+    `SELECT prod AS producto, COUNT(*)::int AS n FROM (${partes.join(' UNION ALL ')}) u WHERE prod NOT IN ('SIN REGISTRO','OTROS') GROUP BY 1 ORDER BY 2 DESC LIMIT 10`,
     args,
   );
   return json(rows);

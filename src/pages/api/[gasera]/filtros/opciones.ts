@@ -13,7 +13,7 @@ export const GET: APIRoute = async ({ params }) => {
   );
   const cabinas = [{ cabina: 'in' }, { cabina: 'out' }];
   const productos = await query(
-    `SELECT DISTINCT gestion_diaria.normalizar_producto(producto) AS producto FROM (SELECT producto FROM ${qid(cfg.tablas.inbound)} UNION ALL SELECT producto FROM ${qid(cfg.tablas.outbound)}) u ORDER BY 1`,
+    `SELECT DISTINCT gestion_diaria.normalizar_producto(producto) AS producto FROM (SELECT producto FROM ${qid(cfg.tablas.inbound)} UNION ALL SELECT producto FROM ${qid(cfg.tablas.outbound)}) u WHERE gestion_diaria.normalizar_producto(producto) NOT IN ('SIN REGISTRO','OTROS') ORDER BY 1`,
   );
   return json({ meses, cabinas, clasificaciones: ['APTA', 'NO APTA'], productos });
 };
