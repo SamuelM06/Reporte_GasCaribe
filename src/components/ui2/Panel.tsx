@@ -149,34 +149,47 @@ export function TablaGlass({
 
 export interface HeatCell {
   mes: string;
+  mes_key: string;
   hora: number;
   n: number;
 }
 
+const MESES_CORTOS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+function mesCorto(mesKey: string): string {
+  const m = parseInt(mesKey.split('-')[1], 10);
+  return MESES_CORTOS[m - 1] ?? mesKey;
+}
+
 export function HeatmapAbandono({ data }: { data: HeatCell[] }) {
-  const meses = [...new Set(data.map((d) => d.mes))].sort();
+  const meses = [...new Set(data.map((d) => d.mes_key))].sort();
   const max = Math.max(1, ...data.map((d) => d.n));
-  const val = (mes: string, h: number) => data.find((d) => d.mes === mes && d.hora === h)?.n ?? 0;
+  const val = (mk: string, h: number) => data.find((d) => d.mes_key === mk && d.hora === h)?.n ?? 0;
   if (!meses.length) return <p className="text-xs">Sin datos.</p>;
   return (
     <div className="h-full overflow-auto">
-      <div className="grid gap-1" style={{ gridTemplateColumns: `34px repeat(${meses.length}, 1fr)` }}>
-        <span />
-        {meses.map((m) => (
-          <strong key={m} className="text-center text-[10px]">{m.slice(5)}</strong>
+      <div className="grid gap-[3px]" style={{ gridTemplateColumns: `52px repeat(24, 1fr)` }}>
+        <span className="text-[9px] font-bold text-tinta/50">Mes / Hora</span>
+        {Array.from({ length: 24 }, (_, h) => (
+          <span key={`h${h}`} className="text-center text-[8px] font-bold text-tinta/50">{h}</span>
         ))}
-        {Array.from({ length: 24 }, (_, h) => [
-          <span key={`h${h}`} className="text-[10px] font-extrabold">{h}h</span>,
-          ...meses.map((m) => {
-            const n = val(m, h);
-            const a = 0.06 + 0.94 * (n / max);
+        {meses.map((mk) => [
+          <span key={`m${mk}`} className="flex items-center text-[10px] font-extrabold text-tinta/70">{mesCorto(mk)}</span>,
+          ...Array.from({ length: 24 }, (_, h) => {
+            const n = val(mk, h);
+            const a = n === 0 ? 0 : 0.15 + 0.85 * (n / max);
             return (
               <span
-                key={`${m}${h}`}
-                title={`${m} ${h}h: ${n}`}
-                className="min-h-[15px] rounded"
-                style={{ background: `rgba(0,205,147,${a.toFixed(2)})` }}
-              />
+                key={`${mk}-${h}`}
+                title={`${mesCorto(mk)} ${h}h: ${n} casos`}
+                className="flex min-h-[18px] items-center justify-center rounded text-[8px] font-bold"
+                style={{
+                  background: n === 0 ? 'transparent' : `rgba(220,38,38,${a.toFixed(2)})`,
+                  color: a > 0.5 ? '#fff' : 'var(--c-tinta, #333)',
+                }}
+              >
+                {n > 0 ? n : ''}
+              </span>
             );
           }),
         ])}

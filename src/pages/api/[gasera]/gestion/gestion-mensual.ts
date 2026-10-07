@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getGasera } from '../../../../gaseras/registry.js';
 import { qid, query } from '../../../../lib/db/pool.js';
 import { bad, json } from '../../../../lib/api/respond.js';
-import { leerFiltros, orderMeses, whereGestion } from '../../../../lib/api/filtros.js';
+import { leerFiltros, orderMeses, whereInbound, whereOutbound } from '../../../../lib/api/filtros.js';
 
 const RET = `resultado_normalizado IN ('retenido', 'cancelado + venta')`;
 
@@ -15,12 +15,12 @@ export const GET: APIRoute = async ({ params, url }) => {
   const partes: string[] = [];
   const args: unknown[] = [];
   if (!f.cabina || f.cabina === 'in') {
-    const w = whereGestion(f, '', args.length + 1);
+    const w = whereInbound(f, '', args.length + 1);
     partes.push(`SELECT anio, mes, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.inbound)} ${w.where}`);
     args.push(...w.params);
   }
   if (!f.cabina || f.cabina === 'out') {
-    const w = whereGestion(f, '', args.length + 1);
+    const w = whereOutbound(f, '', args.length + 1);
     partes.push(`SELECT anio, mes, clasificacion, resultado_normalizado FROM ${qid(cfg.tablas.outbound)} ${w.where}`);
     args.push(...w.params);
   }

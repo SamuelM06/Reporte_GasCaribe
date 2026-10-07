@@ -8,7 +8,6 @@ const config: GaseraConfig = {
   tablas: {
     inbound: '__PREFIJO___inbound',
     outbound: '__PREFIJO___outbound',
-    abandono: '__PREFIJO___abandono',
   },
   vistas: {
     inbound: 'v___PREFIJO___inbound_clasificado',

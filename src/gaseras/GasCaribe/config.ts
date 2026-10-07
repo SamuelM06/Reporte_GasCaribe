@@ -1,7 +1,7 @@
 export interface GaseraConfig {
   codigo: string; // = columna gasera en tabla clasificacion
   nombre: string;
-  tablas: { inbound: string; outbound: string; abandono: string };
+  tablas: { inbound: string; outbound: string };
   vistas: { inbound: string; outbound: string };
 }
 
@@ -11,7 +11,6 @@ const config: GaseraConfig = {
   tablas: {
     inbound: 'caribe_inbound',
     outbound: 'caribe_outbound',
-    abandono: 'caribe_abandono',
   },
   vistas: {
     inbound: 'v_caribe_inbound_clasificado',

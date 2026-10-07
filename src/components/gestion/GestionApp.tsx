@@ -7,7 +7,6 @@ import {
   CircleX,
   PhoneCall,
   PhoneIncoming,
-  PhoneMissed,
   PhoneOutgoing,
   ShieldCheck,
   Percent,
@@ -197,7 +196,7 @@ export default function GestionApp({ gasera }: { gasera: string }) {
         <KpiCard titulo="Total general" valor={kpis?.total_general ?? 0} icono={<PhoneCall />} acento="azul" />
         <KpiCard titulo="Inbound" valor={kpis?.inbound ?? 0} icono={<PhoneIncoming />} acento="violeta" />
         <KpiCard titulo="Outbound" valor={kpis?.outbound ?? 0} icono={<PhoneOutgoing />} acento="azul" />
-        <KpiCard titulo="Abandono" valor={kpis?.abandono_unicos ?? 0} icono={<PhoneMissed />} acento="ambar" />
+
         <KpiCard titulo="Aptas" valor={kpis?.aptas ?? 0} icono={<BadgeCheck />} acento="verde-oscuro" />
         <KpiCard titulo="No aptas" valor={kpis?.no_aptas ?? 0} icono={<CircleX />} acento="ambar" />
         <KpiCard titulo="Retenciones" valor={kpis?.retenciones ?? 0} icono={<ShieldCheck />} acento="verde-claro" sub="retenido + canc. + venta" />

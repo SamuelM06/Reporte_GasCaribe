@@ -10,9 +10,4 @@ export interface ResultadoRow {
   n: number;
 }
 
-export interface FranjaRow {
-  mes: string;
-  hora: number;
-  franja_label: string;
-  abandonos: number;
-}
+

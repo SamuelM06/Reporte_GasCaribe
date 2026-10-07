@@ -48,14 +48,30 @@ export interface WhereBuilt {
   params: unknown[];
 }
 
-// Filtros sobre inbound/outbound (alias de tabla opcional).
-// Cabina NO filtra por columna: selecciona la tabla origen ('in'/'out').
-// Los endpoints UNION incluyen solo las mitades pedidas. Producto via normalizar_producto().
-export function whereGestion(f: Filtros, alias = '', base = 1): WhereBuilt {
+// Filtros sobre INBOUND: mes/año se extraen de fecha_de_ejecucion (fecha de atencion del Excel).
+export function whereInbound(f: Filtros, alias = '', base = 1): WhereBuilt {
   const p = alias ? `${alias}.` : '';
   const conds: string[] = [];
   const params: unknown[] = [];
-  // OJO: el placeholder se calcula ANTES del push: base + cantidad actual.
+  const add = (cond: (ph: string) => string, v: unknown): void => {
+    const ph = `$${base + params.length}`;
+    params.push(v);
+    conds.push(cond(ph));
+  };
+  if (f.anio !== undefined) add((ph) => `EXTRACT(YEAR FROM ${p}fecha_de_ejecucion) = ${ph}`, f.anio);
+  if (f.mesNombre !== undefined) add((ph) => `EXTRACT(MONTH FROM ${p}fecha_de_ejecucion) = ${ph}`, MESES_ES.indexOf(f.mesNombre) + 1);
+  if (f.clasificacion !== undefined) add((ph) => `${p}clasificacion = ${ph}`, f.clasificacion);
+  if (f.producto !== undefined) {
+    add((ph) => `gestion_diaria.normalizar_producto(${p}producto) = ${ph}`, f.producto);
+  }
+  return { where: conds.length ? `WHERE ${conds.join(' AND ')}` : '', params };
+}
+
+// Filtros sobre OUTBOUND: mes/año vienen de la columna 'mes' del Excel.
+export function whereOutbound(f: Filtros, alias = '', base = 1): WhereBuilt {
+  const p = alias ? `${alias}.` : '';
+  const conds: string[] = [];
+  const params: unknown[] = [];
   const add = (cond: (ph: string) => string, v: unknown): void => {
     const ph = `$${base + params.length}`;
     params.push(v);
@@ -66,23 +82,6 @@ export function whereGestion(f: Filtros, alias = '', base = 1): WhereBuilt {
   if (f.clasificacion !== undefined) add((ph) => `${p}clasificacion = ${ph}`, f.clasificacion);
   if (f.producto !== undefined) {
     add((ph) => `gestion_diaria.normalizar_producto(${p}producto) = ${ph}`, f.producto);
-  }
-  return { where: conds.length ? `WHERE ${conds.join(' AND ')}` : '', params };
-}
-
-// Filtros sobre caribe_abandono (mes por fecha_llamada).
-export function whereAbandono(f: Filtros, alias = '', base = 1): WhereBuilt {
-  const p = alias ? `${alias}.` : '';
-  const conds: string[] = [];
-  const params: unknown[] = [];
-  const add = (cond: (ph: string) => string, v: unknown): void => {
-    const ph = `$${base + params.length}`;
-    params.push(v);
-    conds.push(cond(ph));
-  };
-  if (f.anio !== undefined) add((ph) => `EXTRACT(YEAR FROM ${p}fecha_llamada) = ${ph}`, f.anio);
-  if (f.mesNombre !== undefined) {
-    add((ph) => `EXTRACT(MONTH FROM ${p}fecha_llamada) = ${ph}`, MESES_ES.indexOf(f.mesNombre) + 1);
   }
   return { where: conds.length ? `WHERE ${conds.join(' AND ')}` : '', params };
 }

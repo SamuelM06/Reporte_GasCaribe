@@ -90,13 +90,19 @@ export function TrendRetencion({ data }: { data: TrendPunto[] }) {
     mesCorto: short(d.mes),
     pct: +(d.pct_retencion * 100).toFixed(1),
   }));
+  const maxVol = Math.max(...rows.map((r) => r.outbound + r.inbound + r.retenciones), 1);
+  const maxPct = Math.max(...rows.map((r) => r.pct), 0);
+  const pctScaled = rows.map((r) => ({
+    ...r,
+    pctScaled: (r.pct / 100) * maxVol * 3,
+  }));
+  const domainMax = Math.max(maxVol, (maxPct / 100) * maxVol * 3) * 1.1;
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ComposedChart data={rows} margin={{ top: 20, right: 8, bottom: 0, left: -12 }}>
+      <ComposedChart data={pctScaled} margin={{ top: 20, right: 8, bottom: 0, left: -12 }}>
         <CartesianGrid strokeDasharray="4 4" stroke="var(--cglass-borde)" vertical={false} />
         <XAxis dataKey="mesCorto" tick={{ fontSize: 11, fontWeight: 700 }} tickLine={false} axisLine={false} />
-        <YAxis yAxisId="vol" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={44} />
-        <YAxis yAxisId="pct" orientation="right" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={40} unit="%" />
+        <YAxis yAxisId="vol" domain={[0, domainMax]} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={44} />
         <Tooltip contentStyle={GLASS_TOOLTIP} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Bar yAxisId="vol" dataKey="outbound" name="Outbound" fill="#3b82f6" radius={[6, 6, 0, 0]} animationDuration={700}>
@@ -108,8 +114,8 @@ export function TrendRetencion({ data }: { data: TrendPunto[] }) {
         <Bar yAxisId="vol" dataKey="retenciones" name="Retenciones" fill="#00cd93" radius={[6, 6, 0, 0]} animationDuration={700}>
           <LabelList dataKey="retenciones" position="top" content={etiquetaFondo('#00cd93')} />
         </Bar>
-        <Line yAxisId="pct" type="monotone" dataKey="pct" name="% Retención" stroke="#047857" strokeWidth={3} dot={{ r: 4, fill: '#047857', strokeWidth: 2, stroke: '#fff' }} animationDuration={900}>
-          <LabelList dataKey="pct" position="top" content={etiquetaFondo('#047857', (v) => `${v}%`)} />
+        <Line yAxisId="vol" type="monotone" dataKey="pctScaled" name="% Retención" stroke="#047857" strokeWidth={3} dot={{ r: 4, fill: '#047857', strokeWidth: 2, stroke: '#fff' }} animationDuration={900}>
+          <LabelList dataKey="pctScaled" position="top" content={etiquetaFondo('#047857', (v) => `${((v / maxVol) * 100 / 3).toFixed(1)}%`)} />
         </Line>
       </ComposedChart>
     </ResponsiveContainer>
