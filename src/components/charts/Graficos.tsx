@@ -115,7 +115,7 @@ export function TrendRetencion({ data }: { data: TrendPunto[] }) {
           <LabelList dataKey="retenciones" position="top" content={etiquetaFondo('#00cd93')} />
         </Bar>
         <Line yAxisId="vol" type="monotone" dataKey="pctScaled" name="% Retención" stroke="#047857" strokeWidth={3} dot={{ r: 4, fill: '#047857', strokeWidth: 2, stroke: '#fff' }} animationDuration={900}>
-          <LabelList dataKey="pctScaled" position="top" content={etiquetaFondo('#047857', (v) => `${((v / maxVol) * 100 / 3).toFixed(1)}%`)} />
+          <LabelList dataKey="pctScaled" position="top" content={etiquetaFondo('#047857', (v: any) => `${((v / maxVol) * 100 / 3).toFixed(1)}%`)} />
         </Line>
       </ComposedChart>
     </ResponsiveContainer>
@@ -201,5 +201,139 @@ export function ProductosBars({ data }: { data: Array<{ producto: string; n: num
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+  );
+}
+
+export interface FunnelKpis {
+  total_general: number;
+  inbound: number;
+  outbound: number;
+  aptas: number;
+  no_aptas: number;
+  retenciones: number;
+  pct_retencion: number;
+}
+
+const FUNNEL_STEPS = [
+  { key: 'total_general', label: 'Total general', color: '#3b82f6' },
+  { key: 'inbound', label: 'Inbound', color: '#8b5cf6' },
+  { key: 'outbound', label: 'Outbound', color: '#06b6d4' },
+  { key: 'aptas', label: 'Aptas', color: '#00cd93' },
+  { key: 'no_aptas', label: 'No aptas', color: '#f59e0b' },
+  { key: 'retenciones', label: 'Retenciones', color: '#047857' },
+] as const;
+
+export function FunnelGestion({ kpis }: { kpis?: Partial<FunnelKpis> | Record<string, number> | null }) {
+  if (!kpis || typeof kpis !== 'object' || kpis.total_general === undefined) {
+    return (
+      <div className="w-full h-full flex items-center justify-center text-tinta/50 text-sm">
+        Cargando embudo...
+      </div>
+    );
+  }
+  const maxVal = Math.max(kpis.total_general || 1, 1);
+  const steps = FUNNEL_STEPS.map((s) => {
+    const val = (kpis as Record<string, number>)[s.key] ?? 0;
+    return {
+      ...s,
+      value: val,
+      pctOfTotal: maxVal > 0 ? (val / maxVal) * 100 : 0,
+      pctOfPrev: 0,
+    };
+  });
+  for (let i = 1; i < steps.length; i++) {
+    const prev = steps[i - 1].value || 1;
+    steps[i].pctOfPrev = (steps[i].value / prev) * 100;
+  }
+  const rawPct = (kpis as Record<string, number>).pct_retencion ?? 0;
+  const pctRetencion = rawPct <= 1 ? rawPct * 100 : rawPct;
+  const stepHeight = 34;
+  const gap = 4;
+  const svgHeight = steps.length * (stepHeight + gap) + 32;
+  const svgWidth = 280;
+  const maxFunnelWidth = 220;
+  const minFunnelWidth = 76;
+  const funnelOffsetX = (svgWidth - maxFunnelWidth) / 2;
+  return (
+    <div className="w-full h-full flex items-center justify-center p-1">
+      <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} preserveAspectRatio="xMidYMid meet" className="w-full h-full">
+        <defs>
+          <linearGradient id="funnelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#00cd93" stopOpacity="0.8" />
+          </linearGradient>
+        </defs>
+        <g transform={`translate(${funnelOffsetX}, 6)`}>
+          {steps.map((step, i) => {
+            const width = Math.max((step.pctOfTotal / 100) * maxFunnelWidth, minFunnelWidth);
+            const x = (maxFunnelWidth - width) / 2;
+            const y = i * (stepHeight + gap);
+            const isLast = i === steps.length - 1;
+            const nextWidth = isLast ? Math.max(width - 8, minFunnelWidth) : Math.max((steps[i + 1].pctOfTotal / 100) * maxFunnelWidth, minFunnelWidth);
+            const nextX = (maxFunnelWidth - nextWidth) / 2;
+            const centerX = maxFunnelWidth / 2;
+            const centerY = y + stepHeight / 2;
+            return (
+              <g key={step.key} className="cursor-default">
+                <title>{`${step.label}: ${step.value.toLocaleString('es-CO')} (${step.pctOfTotal.toFixed(1)}%)`}</title>
+                <path
+                  d={isLast
+                    ? `M ${x} ${y} L ${x + width} ${y} L ${x + width - 5} ${y + stepHeight} L ${x + 5} ${y + stepHeight} Z`
+                    : `M ${x} ${y} L ${x + width} ${y} L ${nextX + nextWidth} ${y + stepHeight} L ${nextX} ${y + stepHeight} Z`}
+                  fill={step.color}
+                  fillOpacity={0.88}
+                  stroke="rgba(255,255,255,0.14)"
+                  strokeWidth={0.5}
+                />
+                <text
+                  x={centerX}
+                  y={centerY - 7.5}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={6}
+                  fontWeight={700}
+                  fill="white"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.45)' }}
+                >
+                  {step.label}
+                </text>
+                <text
+                  x={centerX}
+                  y={centerY + 0.5}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={7.5}
+                  fontWeight={800}
+                  fill="white"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.45)' }}
+                >
+                  {step.value.toLocaleString('es-CO')}
+                </text>
+                <text
+                  x={centerX}
+                  y={centerY + 8}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={5.2}
+                  fontWeight={600}
+                  fill="rgba(255,255,255,0.9)"
+                  style={{ textShadow: '0 1px 2px rgba(0,0,0,0.45)' }}
+                >
+                  {step.pctOfTotal.toFixed(1)}%
+                </text>
+              </g>
+            );
+          })}
+          <g transform={`translate(${maxFunnelWidth / 2}, ${steps.length * (stepHeight + gap) + 6})`}>
+            <text x={0} y={0} textAnchor="middle" dominantBaseline="central" fontSize={7.5} fontWeight={800} fill="currentColor">
+              % Ret: {pctRetencion.toFixed(1)}%
+            </text>
+            <text x={0} y={10} textAnchor="middle" dominantBaseline="central" fontSize={6} fill="#94a3b8">
+              (Ret/Aptas)
+            </text>
+          </g>
+        </g>
+      </svg>
+    </div>
   );
 }

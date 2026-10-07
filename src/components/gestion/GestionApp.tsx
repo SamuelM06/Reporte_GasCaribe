@@ -13,11 +13,12 @@ import {
 } from 'lucide-react';
 import KpiCard from '../KpiCard.jsx';
 import FiltrosBar, { FILTRO_VACIO, qs, type FiltroValor, type Opciones } from '../filtros/FiltrosBar.jsx';
-import { CabinasLines, DonutCabinas, ProductosBars, TrendRetencion } from '../charts/Graficos.jsx';
+import { CabinasLines, DonutCabinas, ProductosBars, TrendRetencion, FunnelGestion } from '../charts/Graficos.tsx';
 import { Panel, TablaGlass } from '../ui2/Panel.jsx';
 
 const TABS = [
   { id: 'tendencia', label: 'Tendencia y participación' },
+  { id: 'embudo', label: 'Embudo de gestión' },
   { id: 'tablas', label: 'Tablas de gestión' },
 ] as const;
 
@@ -233,6 +234,10 @@ export default function GestionApp({ gasera }: { gasera: string }) {
               </Panel>
             </div>
           </div>
+        ) : tab === 'embudo' ? (
+          <Panel titulo="Embudo de gestión" subtitulo="Total → Inbound/Outbound → Aptas/No aptas → Retenciones" className="h-full">
+            <FunnelGestion kpis={kpis ?? {}} />
+          </Panel>
         ) : (
           <div className="h-full min-h-0 overflow-y-auto">
             <div className="flex flex-col gap-2">
